@@ -22,30 +22,44 @@
     <button id="submit_btn" onclick="sendDataToBot()">СФОРМУВАТИ ДОКУМЕНТ</button>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+    let tg = window.Telegram.WebApp;
+    tg.expand();
 
-        function sendDataToBot() {
-            const data = {
-                full_name: document.getElementById('full_name').value.trim(),
-                address: document.getElementById('address').value.trim(),
-                city: document.getElementById('city').value.trim(),
-                date: document.getElementById('date').value.trim()
-            };
+    // Отримуємо параметри з URL (doc_type)
+    const urlParams = new URLSearchParams(window.location.search);
+    const docType = urlParams.get('doc_type') || 'anmeldung';
 
-            if (!data.full_name || !data.address || !data.city) {
-                alert("Заповніть усі поля!");
-                return;
-            }
+    function sendDataToBot() {
+        // Збираємо відповіді користувача
+        const userAnswers = {
+            full_name: document.getElementById('full_name').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            signature_date: document.getElementById('date').value.trim()
+        };
 
-            // Відправка даних у бот
-            tg.sendData(JSON.stringify(data));
-
-            // Пауза 0.5 сек перед закриттям, щоб дані точно пішли
-            setTimeout(() => {
-                tg.close();
-            }, 500);
+        // Перевірка заповнення
+        if (!userAnswers.full_name || !userAnswers.address || !userAnswers.city) {
+            alert("Заповніть усі поля!");
+            return;
         }
-    </script>
+
+        // Формуємо пакет даних для нового бота v5.0
+        const data = {
+            doc_type: docType,
+            status: 'success',
+            user_answers: userAnswers
+        };
+
+        // ВІДПРАВКА
+        tg.sendData(JSON.stringify(data));
+
+        // Закриваємо через паузу
+        setTimeout(() => {
+            tg.close();
+        }, 500);
+    }
+</script>
 </body>
 </html>
+
