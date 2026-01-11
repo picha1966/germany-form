@@ -3,86 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>German Doc Bot</title>
+    <title>Anmeldung - Анкета</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            padding: 20px; 
-            background-color: var(--tg-theme-bg-color, #ffffff); 
-            color: var(--tg-theme-text-color, #000000); 
-        }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; color: var(--tg-theme-hint-color, #888); }
-        input { 
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; 
-            font-size: 16px; background: var(--tg-theme-secondary-bg-color, #efeff4); 
-            color: var(--tg-theme-text-color, #000000); 
-        }
-        button { 
-            width: 100%; padding: 15px; background-color: #2cab37; color: white; 
-            border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        body { font-family: -apple-system, sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+        .section { margin-bottom: 20px; padding: 10px; border-radius: 10px; background: var(--tg-theme-secondary-bg-color, #f5f5f5); }
+        h4 { margin: 0 0 10px 0; color: #0088cc; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 13px; margin-bottom: 4px; color: var(--tg-theme-hint-color, #888); }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 15px; }
+        button { width: 100%; padding: 15px; background: #2cab37; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h3>📝 Заповнення анкети</h3>
+    <h3>📝 Анкета для Anmeldung</h3>
     
-    <div class="form-group">
-        <label>Повне ім'я (Латиницею)</label>
-        <input type="text" id="full_name" placeholder="Vitalii Pichkur">
+    <div class="section">
+        <h4>Персональні дані</h4>
+        <div class="form-group"><label>Ім'я</label><input type="text" id="first_name" placeholder="Vitalii"></div>
+        <div class="form-group"><label>Прізвище</label><input type="text" id="last_name" placeholder="Pichkur"></div>
+        <div class="form-group"><label>Дата народження</label><input type="text" id="birth_date" placeholder="DD.MM.YYYY"></div>
+        <div class="form-group"><label>Місце народження</label><input type="text" id="birth_place" placeholder="Kyiv"></div>
+        <div class="form-group"><label>Громадянство</label><input type="text" id="nationality" placeholder="Ukrainian"></div>
     </div>
 
-    <div class="form-group">
-        <label>Адреса (Вулиця та номер)</label>
-        <input type="text" id="address" placeholder="Marienplatz 1">
+    <div class="section">
+        <h4>Нова адреса</h4>
+        <div class="form-group"><label>Вулиця</label><input type="text" id="street" placeholder="Marienplatz"></div>
+        <div class="form-group"><label>Номер будинку</label><input type="text" id="house_number" placeholder="1"></div>
+        <div class="form-group"><label>Поштовий індекс</label><input type="text" id="postal_code" placeholder="80331"></div>
+        <div class="form-group"><label>Місто</label><input type="text" id="city" placeholder="München"></div>
+        <div class="form-group"><label>Дата заїзду</label><input type="text" id="move_in_date" placeholder="DD.MM.YYYY"></div>
     </div>
 
-    <div class="form-group">
-        <label>Індекс та Місто</label>
-        <input type="text" id="city" placeholder="80331 Muenchen">
+    <div class="section">
+        <h4>Додатково</h4>
+        <div class="form-group"><label>Релігія</label><input type="text" id="religion" placeholder="none / evangelisch / katholisch"></div>
+        <div class="form-group"><label>Сімейний стан</label><input type="text" id="marital_status" placeholder="ledig / verheiratet"></div>
+        <div class="form-group"><label>Прізвище орендодавця</label><input type="text" id="landlord_name" placeholder="Hans Schmidt"></div>
     </div>
 
-    <div class="form-group">
-        <label>Дата підпису</label>
-        <input type="text" id="date" value="11.01.2026">
-    </div>
-
-    <button id="submit_btn" onclick="sendData()">СКУВАТИ ДОКУМЕНТ ✅</button>
+    <button onclick="submitForm()">СКУВАТИ ДОКУМЕНТ ✅</button>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const docType = urlParams.get('doc_type') || 'anmeldung';
-
-        function sendData() {
+        function submitForm() {
             const userAnswers = {
-                full_name: document.getElementById('full_name').value.trim(),
-                address: document.getElementById('address').value.trim(),
-                city: document.getElementById('city').value.trim(),
-                signature_date: document.getElementById('date').value.trim()
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                birth_date: document.getElementById('birth_date').value,
+                birth_place: document.getElementById('birth_place').value,
+                nationality: document.getElementById('nationality').value,
+                street: document.getElementById('street').value,
+                house_number: document.getElementById('house_number').value,
+                postal_code: document.getElementById('postal_code').value,
+                city: document.getElementById('city').value,
+                move_in_date: document.getElementById('move_in_date').value,
+                religion: document.getElementById('religion').value,
+                marital_status: document.getElementById('marital_status').value,
+                landlord_name: document.getElementById('landlord_name').value,
+                signature_date: new Date().toLocaleDateString('de-DE'),
+                signature_place: document.getElementById('city').value
             };
 
-            if (!userAnswers.full_name || !userAnswers.address || !userAnswers.city) {
-                alert("Заповніть усі поля!");
-                return;
-            }
-
             const data = {
-                doc_type: docType,
-                status: 'success',
+                doc_type: new URLSearchParams(window.location.search).get('doc_type') || 'anmeldung',
                 user_answers: userAnswers
             };
 
             tg.sendData(JSON.stringify(data));
-            tg.close();
         }
     </script>
 </body>
 </html>
+
 
 
 
