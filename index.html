@@ -1,40 +1,69 @@
-<script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
-
-    function submitForm() {
-        const btn = document.getElementById('main_button');
-        
-        // АВТОЗАПОВНЕННЯ ДЛЯ ТЕСТУ (щоб ви не вводили 100 разів)
-        const getValue = (id, fallback) => document.getElementById(id).value || fallback;
-
-        const userAnswers = {
-            first_name: getValue('first_name', 'Vitalii'),
-            last_name: getValue('last_name', 'Pichkur'),
-            birth_date: getValue('birth_date', '01.01.1980'),
-            city: getValue('city', 'Kyiv'),
-            // ... інші поля за аналогією
-        };
-
-        const data = {
-            doc_type: new URLSearchParams(window.location.search).get('doc_type') || 'anmeldung',
-            user_answers: userAnswers,
-            status: 'success'
-        };
-
-        console.log("Sending data:", data);
-        
-        // Спроба відправки
-        try {
-            tg.sendData(JSON.stringify(data));
-            // Якщо sendData не закриває вікно, спробуємо закрити примусово
-            setTimeout(() => tg.close(), 500);
-        } catch (e) {
-            alert("Помилка відправки: " + e.message);
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anmeldung - Анкета</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+        .section { margin-bottom: 15px; padding: 10px; border-radius: 10px; background: var(--tg-theme-secondary-bg-color, #f5f5f5); }
+        input { 
+            width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; 
+            font-size: 16px; /* Важливо для iOS, щоб не було зуму */
+            -webkit-user-select: text !important; /* Дозволяє виділення та ввід тексту */
+            user-select: text !important;
         }
-    }
-</script>
+        button { 
+            width: 100%; padding: 15px; background: #2cab37; color: white; border: none; 
+            border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h3>📝 Тестова Анкета</h3>
+    
+    <div class="section">
+        <label>Ім'я</label>
+        <input type="text" id="first_name" value="Vitalii">
+        <label>Прізвище</label>
+        <input type="text" id="last_name" value="Pichkur">
+        <label>Місто</label>
+        <input type="text" id="city" value="Berlin">
+    </div>
+
+    <button id="send_btn" onclick="sendToBot()">СКУВАТИ ДОКУМЕНТ ✅</button>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        function sendToBot() {
+            const data = {
+                status: 'success',
+                doc_type: 'anmeldung',
+                user_answers: {
+                    first_name: document.getElementById('first_name').value,
+                    last_name: document.getElementById('last_name').value,
+                    city: document.getElementById('city').value,
+                    signature_date: new Date().toLocaleDateString('de-DE')
+                }
+            };
+            
+            // Виводимо в консоль для перевірки
+            console.log("Sending data:", data);
+            
+            // Відправка
+            tg.sendData(JSON.stringify(data));
+            
+            // Закриття через півсекунди
+            setTimeout(() => { tg.close(); }, 500);
+        }
+    </script>
+</body>
+</html>
+
 
 
 
