@@ -2,76 +2,71 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background: white; }
-        /* Додаємо стилі, які гарантують, що поля активні */
         input { 
-            width: 100%; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            border: 2px solid #ccc; 
-            border-radius: 8px;
-            font-size: 18px; /* Великий шрифт краще працює на мобільних */
-            display: block !important;
-            -webkit-user-select: text !important; /* Дозволяє виділення та ввід */
-            user-select: text !important;
+            width: 100%; padding: 15px; margin-bottom: 10px; border: 2px solid #ccc; 
+            border-radius: 8px; font-size: 16px; box-sizing: border-box;
+            -webkit-user-select: text !important; user-select: text !important;
         }
+        /* Стиль для кнопки, коли вона "вимкнена" */
         button { 
-            width: 100%; 
-            padding: 18px; 
-            background: #28a745; 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            font-size: 18px;
+            width: 100%; padding: 18px; background: #888; color: white; 
+            border: none; border-radius: 10px; font-weight: bold; font-size: 18px; 
+            transition: 0.3s;
         }
+        /* Стиль для кнопки, коли дані введено */
+        button.active { background: #28a745; cursor: pointer; }
+        .hint { color: red; font-size: 12px; margin-bottom: 10px; display: block; text-align: center; }
     </style>
 </head>
 <body>
-    <h3>Введіть дані:</h3>
+    <div id="status_hint" class="hint">❌ Будь ласка, впишіть Прізвище та Ім'я</div>
     
-    <input type="text" id="fn" placeholder="Ім'я" autocomplete="off">
-    
-    <input type="text" id="ln" placeholder="Прізвище" autocomplete="off">
+    <input type="text" id="fn" placeholder="Ім'я" oninput="validate()">
+    <input type="text" id="ln" placeholder="Прізвище" oninput="validate()">
 
-    <button id="send">ВІДПРАВИТИ ✅</button>
+    <button id="send_btn" disabled>ВІДПРАВИТИ ✅</button>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
-        document.getElementById('send').onclick = function() {
-            let name = document.getElementById('fn').value.trim();
-            let surname = document.getElementById('ln').value.trim();
+        const btn = document.getElementById('send_btn');
+        const fn = document.getElementById('fn');
+        const ln = document.getElementById('ln');
+        const hint = document.getElementById('status_hint');
 
-            // Якщо порожньо - просто показуємо алерт і НЕ закриваємо
-            if (name === "" || surname === "") {
-                alert("Будь ласка, впишіть дані!");
-                return;
+        // Функція, яка перевіряє поля в реальному часі
+        function validate() {
+            if (fn.value.trim().length > 1 && ln.value.trim().length > 1) {
+                btn.disabled = false;
+                btn.classList.add('active');
+                hint.style.display = 'none';
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('active');
+                hint.style.display = 'block';
             }
+        }
 
-            // Якщо дані є - відправляємо
-            let result = {
+        btn.onclick = function() {
+            let data = {
                 doc_type: "anmeldung",
                 user_answers: {
-                    first_name: name,
-                    last_name: surname
+                    first_name: fn.value.trim(),
+                    last_name: ln.value.trim()
                 }
             };
-
-            tg.sendData(JSON.stringify(result));
-            
-            setTimeout(() => {
-                tg.close();
-            }, 500);
+            tg.sendData(JSON.stringify(data));
+            setTimeout(() => { tg.close(); }, 500);
         };
     </script>
 </body>
 </html>
+
 
 
 
