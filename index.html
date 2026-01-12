@@ -1,60 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: white; color: black; }
-        input { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        .error { border: 2px solid red; background: #fff0f0; }
-        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; }
+        body { font-family: sans-serif; padding: 20px; background: #fff; color: #000; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 14px; margin-bottom: 5px; color: #555; }
+        /* Робимо інпути максимально простими, щоб вони не блокувалися */
+        input { 
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; 
+            font-size: 16px; box-sizing: border-box; -webkit-user-select: text;
+        }
+        button { 
+            width: 100%; padding: 16px; background: #2cab37; color: white; 
+            border: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 20px;
+        }
+        .error-hint { color: red; font-size: 12px; display: none; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <h3>📝 Форма реєстрації</h3>
+    <h3>📝 Тестова Анкета</h3>
     
-    <input type="text" id="fname" placeholder="Ім'я (обов'язково)">
-    <input type="text" id="lname" placeholder="Прізвище (обов'язково)">
-    <input type="text" id="city" placeholder="Місто">
+    <div class="form-group">
+        <label>Ваше Ім'я (латиницею)</label>
+        <input type="text" id="first_name" placeholder="Наприклад: Vitalii">
+        <div id="err_fn" class="error-hint">⚠️ Будь ласка, введіть ім'я</div>
+    </div>
 
-    <button id="send">ВІДПРАВИТИ В БОТ</button>
+    <div class="form-group">
+        <label>Ваше Прізвище (латиницею)</label>
+        <input type="text" id="last_name" placeholder="Наприклад: Pichkur">
+        <div id="err_ln" class="error-hint">⚠️ Будь ласка, введіть прізвище</div>
+    </div>
+
+    <button id="main_btn">СКУВАТИ ДОКУМЕНТ ✅</button>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // Розгортаємо на весь екран
 
-        document.getElementById('send').addEventListener('click', function() {
-            let f = document.getElementById('fname').value.trim();
-            let l = document.getElementById('lname').value.trim();
+        const btn = document.getElementById('main_btn');
 
-            // ПЕРЕВІРКА №1: Якщо порожньо - ми просто нічого не робимо
-            if (f === "" || l === "") {
-                alert("Помилка: Заповніть ім'я та прізвище!");
-                return; // Це ПОВИННО зупинити закриття
+        btn.addEventListener('click', function() {
+            const fn = document.getElementById('first_name').value.trim();
+            const ln = document.getElementById('last_name').value.trim();
+            const errFn = document.getElementById('err_fn');
+            const errLn = document.getElementById('err_ln');
+
+            // Скидаємо помилки
+            errFn.style.display = 'none';
+            errLn.style.display = 'none';
+
+            // ПЕРЕВІРКА: якщо порожньо, НЕ закриваємо анкету
+            if (fn === "" || ln === "") {
+                if (fn === "") errFn.style.display = 'block';
+                if (ln === "") errLn.style.display = 'block';
+                return; // ЗУПИНЯЄМО ТУТ. Анкета НЕ зникне.
             }
 
-            let data = {
+            // Якщо дані є - відправляємо
+            btn.innerText = "НАДСИЛАННЯ...";
+            btn.disabled = true;
+
+            const payload = {
+                doc_type: 'anmeldung',
                 user_answers: {
-                    first_name: f,
-                    last_name: l,
-                    city: document.getElementById('city').value
-                },
-                doc_type: "anmeldung"
+                    first_name: fn,
+                    last_name: ln
+                }
             };
 
-            // ВІДПРАВКА
-            tg.sendData(JSON.stringify(data));
+            tg.sendData(JSON.stringify(payload));
             
-            // ПЕРЕВІРКА №2: Затримка перед закриттям
+            // Закриваємо тільки після успішної відправки
             setTimeout(() => {
                 tg.close();
-            }, 500);
+            }, 400);
         });
     </script>
 </body>
 </html>
-
-
 
 
 
