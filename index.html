@@ -1,152 +1,58 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anmeldung - GERMAN DOC BOT</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --tg-bg: var(--tg-theme-bg-color, #ffffff);
-            --tg-text: var(--tg-theme-text-color, #222222);
-            --tg-hint: var(--tg-theme-hint-color, #888888);
-            --tg-link: var(--tg-theme-link-color, #2678b6);
-            --tg-button: var(--tg-theme-button-color, #2cab37);
-            --tg-secondary: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        }
-
-        body { font-family: -apple-system, sans-serif; background: var(--tg-bg); color: var(--tg-text); margin: 0; padding: 15px; padding-bottom: 100px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .section { background: var(--tg-secondary); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); }
-        .section-title { font-size: 14px; font-weight: bold; color: var(--tg-link); margin-bottom: 10px; text-transform: uppercase; }
-        
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 12px; color: var(--tg-hint); margin-bottom: 4px; padding-left: 5px; }
-        input { 
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; 
-            box-sizing: border-box; font-size: 16px; background: var(--tg-bg); color: var(--tg-text);
-            transition: border 0.3s;
-        }
-        input.error { border: 2px solid #ff4d4d; background: #fff0f0; }
-        
-        .error-message { color: #ff4d4d; font-size: 12px; margin-top: 10px; display: none; text-align: center; font-weight: bold; }
-
-        .footer-button {
-            position: fixed; bottom: 0; left: 0; right: 0; padding: 15px; background: var(--tg-bg);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
-        }
-        button { 
-            width: 100%; padding: 16px; background: #2cab37; color: white; border: none; 
-            border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer;
-        }
-        button:disabled { background: #888; cursor: not-allowed; }
+        body { font-family: sans-serif; padding: 20px; background: white; color: black; }
+        input { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .error { border: 2px solid red; background: #fff0f0; }
+        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h3>📄 Анкета Anmeldung</h3>
-        <p style="font-size: 12px; color: var(--tg-hint);">Заповніть латиницею (як у паспорті)</p>
-    </div>
+    <h3>📝 Форма реєстрації</h3>
+    
+    <input type="text" id="fname" placeholder="Ім'я (обов'язково)">
+    <input type="text" id="lname" placeholder="Прізвище (обов'язково)">
+    <input type="text" id="city" placeholder="Місто">
 
-    <div id="error-box" class="error-message">⚠️ Будь ласка, заповніть обов'язкові поля!</div>
-
-    <div class="section">
-        <div class="section-title">Персональні дані</div>
-        <div class="form-group"><label>Ім'я *</label><input type="text" id="first_name" placeholder="Vitalii" required></div>
-        <div class="form-group"><label>Прізвище *</label><input type="text" id="last_name" placeholder="Pichkur" required></div>
-        <div class="form-group"><label>Прізвище при народженні</label><input type="text" id="birth_name" placeholder="-"></div>
-        <div class="form-group"><label>Дата народження *</label><input type="text" id="birth_date" placeholder="DD.MM.YYYY" required></div>
-        <div class="form-group"><label>Місце народження</label><input type="text" id="birth_place" placeholder="Kyiv"></div>
-        <div class="form-group"><label>Країна народження</label><input type="text" id="birth_country" placeholder="Ukraine"></div>
-        <div class="form-group"><label>Громадянство</label><input type="text" id="nationality" placeholder="Ukrainian"></div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Нова адреса в Німеччині</div>
-        <div class="form-group"><label>Вулиця *</label><input type="text" id="street" placeholder="Marienplatz" required></div>
-        <div class="form-group"><label>Номер будинку *</label><input type="text" id="house_number" placeholder="10" required></div>
-        <div class="form-group"><label>Поштовий індекс *</label><input type="text" id="postal_code" placeholder="80331" required></div>
-        <div class="form-group"><label>Місто *</label><input type="text" id="city" placeholder="München" required></div>
-        <div class="form-group"><label>Дата заїзду *</label><input type="text" id="move_in_date" placeholder="DD.MM.YYYY" required></div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Додаткові відомості</div>
-        <div class="form-group"><label>Релігія (rk, ev або keine)</label><input type="text" id="religion" placeholder="keine"></div>
-        <div class="form-group"><label>Сімейний стан</label><input type="text" id="marital_status" placeholder="ledig / verheiratet"></div>
-        <div class="form-group"><label>Попередня адреса</label><input type="text" id="previous_address" placeholder="Ukraine, Kyiv..."></div>
-        <div class="form-group"><label>Орендодавець *</label><input type="text" id="landlord_name" placeholder="Hans Schmidt, Berlinstr. 5" required></div>
-    </div>
-
-    <div class="footer-button">
-        <button id="main_btn" onclick="sendData()">СКУВАТИ ДОКУМЕНТ ✅</button>
-    </div>
+    <button id="send">ВІДПРАВИТИ В БОТ</button>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
-        function sendData() {
-            const errorBox = document.getElementById('error-box');
-            const requiredFields = document.querySelectorAll('input[required]');
-            let isValid = true;
+        document.getElementById('send').addEventListener('click', function() {
+            let f = document.getElementById('fname').value.trim();
+            let l = document.getElementById('lname').value.trim();
 
-            // Скидаємо помилки
-            errorBox.style.display = 'none';
-            requiredFields.forEach(f => f.classList.remove('error'));
-
-            // Перевірка обов'язкових полів
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('error');
-                    isValid = false;
-                }
-            });
-
-            if (!isValid) {
-                errorBox.style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return; // ЗУПИНЯЄМО, анкета НЕ закривається!
+            // ПЕРЕВІРКА №1: Якщо порожньо - ми просто нічого не робимо
+            if (f === "" || l === "") {
+                alert("Помилка: Заповніть ім'я та прізвище!");
+                return; // Це ПОВИННО зупинити закриття
             }
 
-            const btn = document.getElementById('main_btn');
-            btn.innerText = "НАДСИЛАЄМО ДАНІ...";
-            btn.disabled = true;
-
-            const ids = [
-                'first_name', 'last_name', 'birth_name', 'birth_date', 'birth_place', 
-                'birth_country', 'nationality', 'street', 'house_number', 
-                'postal_code', 'city', 'move_in_date', 'religion', 
-                'marital_status', 'previous_address', 'landlord_name'
-            ];
-            
-            let answers = {};
-            ids.forEach(id => {
-                answers[id] = document.getElementById(id).value;
-            });
-
-            answers['signature_date'] = new Date().toLocaleDateString('de-DE');
-            answers['signature_place'] = document.getElementById('city').value || 'Deutschland';
-
-            const payload = {
-                status: 'success',
-                doc_type: 'anmeldung',
-                user_answers: answers
+            let data = {
+                user_answers: {
+                    first_name: f,
+                    last_name: l,
+                    city: document.getElementById('city').value
+                },
+                doc_type: "anmeldung"
             };
 
-            // Відправка
-            tg.sendData(JSON.stringify(payload));
+            // ВІДПРАВКА
+            tg.sendData(JSON.stringify(data));
             
-            // Закриття з невеликою затримкою
+            // ПЕРЕВІРКА №2: Затримка перед закриттям
             setTimeout(() => {
                 tg.close();
-            }, 400);
-        }
+            }, 500);
+        });
     </script>
 </body>
 </html>
-
 
 
 
