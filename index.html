@@ -3,62 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anmeldung - Анкета</title>
+    <title>Anmeldung - GERMAN DOC BOT</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
-        .section { margin-bottom: 15px; padding: 10px; border-radius: 10px; background: var(--tg-theme-secondary-bg-color, #f5f5f5); }
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #222222);
+            --tg-hint: var(--tg-theme-hint-color, #888888);
+            --tg-link: var(--tg-theme-link-color, #2678b6);
+            --tg-button: var(--tg-theme-button-color, #2cab37);
+            --tg-secondary: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        body { font-family: -apple-system, sans-serif; background: var(--tg-bg); color: var(--tg-text); margin: 0; padding: 15px; padding-bottom: 80px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .section { background: var(--tg-secondary); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); }
+        .section-title { font-size: 14px; font-weight: bold; color: var(--tg-link); margin-bottom: 10px; text-transform: uppercase; }
+        
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; color: var(--tg-hint); margin-bottom: 4px; padding-left: 5px; }
         input { 
-            width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; 
-            font-size: 16px; /* Важливо для iOS, щоб не було зуму */
-            -webkit-user-select: text !important; /* Дозволяє виділення та ввід тексту */
-            user-select: text !important;
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; 
+            box-sizing: border-box; font-size: 16px; background: var(--tg-bg); color: var(--tg-text);
+        }
+        
+        .footer-button {
+            position: fixed; bottom: 0; left: 0; right: 0; padding: 15px; background: var(--tg-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
         button { 
-            width: 100%; padding: 15px; background: #2cab37; color: white; border: none; 
+            width: 100%; padding: 16px; background: #2cab37; color: white; border: none; 
             border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer;
         }
+        button:active { opacity: 0.8; transform: scale(0.98); }
     </style>
 </head>
 <body>
-    <h3>📝 Тестова Анкета</h3>
-    
-    <div class="section">
-        <label>Ім'я</label>
-        <input type="text" id="first_name" value="Vitalii">
-        <label>Прізвище</label>
-        <input type="text" id="last_name" value="Pichkur">
-        <label>Місто</label>
-        <input type="text" id="city" value="Berlin">
+    <div class="header">
+        <h3>📄 Анкета Anmeldung</h3>
+        <p style="font-size: 12px; color: var(--tg-hint);">Заповніть латиницею (як у паспорті)</p>
     </div>
 
-    <button id="send_btn" onclick="sendToBot()">СКУВАТИ ДОКУМЕНТ ✅</button>
+    <div class="section">
+        <div class="section-title">Персональні дані</div>
+        <div class="form-group"><label>Ім'я</label><input type="text" id="first_name" placeholder="Vitalii"></div>
+        <div class="form-group"><label>Прізвище</label><input type="text" id="last_name" placeholder="Pichkur"></div>
+        <div class="form-group"><label>Прізвище при народженні</label><input type="text" id="birth_name" placeholder="-"></div>
+        <div class="form-group"><label>Дата народження</label><input type="text" id="birth_date" placeholder="DD.MM.YYYY"></div>
+        <div class="form-group"><label>Місце народження</label><input type="text" id="birth_place" placeholder="Kyiv"></div>
+        <div class="form-group"><label>Країна народження</label><input type="text" id="birth_country" placeholder="Ukraine"></div>
+        <div class="form-group"><label>Громадянство</label><input type="text" id="nationality" placeholder="Ukrainian"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Нова адреса в Німеччині</div>
+        <div class="form-group"><label>Вулиця</label><input type="text" id="street" placeholder="Marienplatz"></div>
+        <div class="form-group"><label>Номер будинку</label><input type="text" id="house_number" placeholder="10"></div>
+        <div class="form-group"><label>Поштовий індекс</label><input type="text" id="postal_code" placeholder="80331"></div>
+        <div class="form-group"><label>Місто</label><input type="text" id="city" placeholder="München"></div>
+        <div class="form-group"><label>Дата заїзду</label><input type="text" id="move_in_date" placeholder="DD.MM.YYYY"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Додаткові відомості</div>
+        <div class="form-group"><label>Релігія (rk, ev або keine)</label><input type="text" id="religion" placeholder="keine"></div>
+        <div class="form-group"><label>Сімейний стан</label><input type="text" id="marital_status" placeholder="ledig / verheiratet"></div>
+        <div class="form-group"><label>Попередня адреса (якщо була)</label><input type="text" id="previous_address" placeholder="Ukraine, Kyiv..."></div>
+        <div class="form-group"><label>Орендодавець (ПІБ та Адреса)</label><input type="text" id="landlord_name" placeholder="Hans Schmidt, Berlinstr. 5"></div>
+    </div>
+
+    <div class="footer-button">
+        <button id="main_btn" onclick="sendData()">СКУВАТИ ДОКУМЕНТ ✅</button>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
-        function sendToBot() {
-            const data = {
+        function sendData() {
+            const btn = document.getElementById('main_btn');
+            btn.innerText = "НАДСИЛАЄМО ДАНІ...";
+            btn.style.background = "#888";
+
+            // Збираємо ВСІ поля
+            const ids = [
+                'first_name', 'last_name', 'birth_name', 'birth_date', 'birth_place', 
+                'birth_country', 'nationality', 'street', 'house_number', 
+                'postal_code', 'city', 'move_in_date', 'religion', 
+                'marital_status', 'previous_address', 'landlord_name'
+            ];
+            
+            let answers = {};
+            ids.forEach(id => {
+                answers[id] = document.getElementById(id).value;
+            });
+
+            // Додаємо автоматичні поля
+            answers['signature_date'] = new Date().toLocaleDateString('de-DE');
+            answers['signature_place'] = document.getElementById('city').value || 'Deutschland';
+
+            const payload = {
                 status: 'success',
                 doc_type: 'anmeldung',
-                user_answers: {
-                    first_name: document.getElementById('first_name').value,
-                    last_name: document.getElementById('last_name').value,
-                    city: document.getElementById('city').value,
-                    signature_date: new Date().toLocaleDateString('de-DE')
-                }
+                user_answers: answers
             };
+
+            // ГАРАНТІЯ: Відправка через офіційний канал
+            tg.sendData(JSON.stringify(payload));
             
-            // Виводимо в консоль для перевірки
-            console.log("Sending data:", data);
-            
-            // Відправка
-            tg.sendData(JSON.stringify(data));
-            
-            // Закриття через півсекунди
-            setTimeout(() => { tg.close(); }, 500);
+            // Закриваємо через паузу, щоб Telegram встиг обробити пакет
+            setTimeout(() => {
+                tg.close();
+            }, 300);
         }
     </script>
 </body>
