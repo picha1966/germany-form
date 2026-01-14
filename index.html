@@ -752,6 +752,14 @@
             // ============================================
             var tg = window.Telegram && window.Telegram.WebApp;
             
+            // Debug logging
+            console.log('=== TELEGRAM WEBAPP DEBUG ===');
+            console.log('tg object:', tg);
+            console.log('tg.sendData available:', !!(tg && tg.sendData));
+            console.log('tg.initData:', tg ? tg.initData : 'N/A');
+            console.log('tg.initDataUnsafe:', tg ? tg.initDataUnsafe : 'N/A');
+            console.log('=============================');
+            
             if (tg) {
                 tg.ready();
                 tg.expand();
@@ -1163,13 +1171,18 @@
                     }
                 });
 
-                // Build payload
+                // Build payload - MUST include status: "success" for bot!
                 var payload = {
                     doc_type: currentDocType,
-                    user_answers: userAnswers
+                    user_answers: userAnswers,
+                    status: 'success'  // CRITICAL: Bot expects this!
                 };
 
-                console.log('Sending payload:', JSON.stringify(payload, null, 2));
+                console.log('=== SENDING TO TELEGRAM ===');
+                console.log('Payload:', JSON.stringify(payload, null, 2));
+                console.log('tg available:', !!tg);
+                console.log('tg.sendData available:', !!(tg && tg.sendData));
+                console.log('===========================');
 
                 // Clear draft
                 try {
@@ -1180,15 +1193,26 @@
 
                 // Send data to Telegram
                 if (tg && tg.sendData) {
-                    tg.sendData(JSON.stringify(payload));
-                    
-                    setTimeout(function() {
-                        if (tg.close) {
-                            tg.close();
-                        }
-                    }, 500);
+                    try {
+                        var jsonString = JSON.stringify(payload);
+                        console.log('Calling tg.sendData with:', jsonString);
+                        tg.sendData(jsonString);
+                        console.log('tg.sendData called successfully');
+                        
+                        // Wait before closing to ensure data is sent
+                        setTimeout(function() {
+                            console.log('Calling tg.close()');
+                            if (tg.close) {
+                                tg.close();
+                            }
+                        }, 500);
+                    } catch (err) {
+                        console.error('Error in tg.sendData:', err);
+                    }
                 } else {
-                    console.log('WebApp not available. Payload:', payload);
+                    console.warn('WebApp not available or not opened via Telegram button!');
+                    console.warn('tg:', tg);
+                    console.warn('To test: Open this WebApp via InlineKeyboardButton with web_app=WebAppInfo(url=...)');
                     
                     statusIcon.textContent = '✅';
                     statusText.textContent = 'Data saved (test mode)';
