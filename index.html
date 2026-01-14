@@ -421,15 +421,15 @@
         <div class="draft-banner" id="draftBanner">
             <div class="draft-banner-text">
                 <span class="icon">📝</span>
-                <span>Data restored from draft</span>
+                <span>Відновлено незавершену анкету</span>
             </div>
-            <button type="button" class="clear-draft-btn" id="clearDraftBtn">Clear Form</button>
+            <button type="button" class="clear-draft-btn" id="clearDraftBtn">Очистити</button>
         </div>
 
         <!-- Validation Status Banner -->
         <div class="validation-status incomplete" id="validationStatus">
             <span class="icon" id="statusIcon">⚠️</span>
-            <span id="statusText">Fill in the required fields</span>
+            <span id="statusText">Заповніть обов'язкові поля</span>
         </div>
 
         <!-- Form -->
@@ -570,6 +570,104 @@
                     >
                     <div class="error-hint" id="postal_code_error">Exactly 5 digits</div>
                 </div>
+
+                <!-- Move-in Date -->
+                <div class="form-group">
+                    <label for="move_in_date">
+                        Move-in Date (Einzugsdatum) <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="move_in_date" 
+                        name="move_in_date"
+                        placeholder="DD.MM.YYYY"
+                        inputmode="numeric"
+                        maxlength="10"
+                        data-section="anmeldung"
+                        data-required="true"
+                        data-format="date"
+                    >
+                    <div class="error-hint" id="move_in_date_error">Format: DD.MM.YYYY</div>
+                </div>
+
+                <!-- Previous Address -->
+                <div class="form-group">
+                    <label for="previous_address">
+                        Previous Address (Bisherige Anschrift)
+                    </label>
+                    <input 
+                        type="text" 
+                        id="previous_address" 
+                        name="previous_address" 
+                        placeholder="e.g., Alte Straße 15, 10117 Berlin"
+                        data-section="anmeldung"
+                        data-required="false"
+                        data-min="0"
+                    >
+                    <div class="error-hint" id="previous_address_error"></div>
+                </div>
+
+                <!-- Landlord Name -->
+                <div class="form-group">
+                    <label for="landlord_name">
+                        Landlord Name (Wohnungsgeber) <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="landlord_name" 
+                        name="landlord_name" 
+                        placeholder="Name of property owner"
+                        data-section="anmeldung"
+                        data-required="true"
+                        data-min="2"
+                    >
+                    <div class="error-hint" id="landlord_name_error">Minimum 2 characters</div>
+                </div>
+
+                <!-- Religion -->
+                <div class="form-group">
+                    <label for="religion">
+                        Religion (Konfession)
+                    </label>
+                    <select 
+                        id="religion" 
+                        name="religion"
+                        data-section="anmeldung"
+                        data-required="false"
+                    >
+                        <option value="">-- Select / Auswählen --</option>
+                        <option value="evangelisch">Evangelisch (Protestant)</option>
+                        <option value="katholisch">Römisch-katholisch (Catholic)</option>
+                        <option value="keine">Keine / Konfessionslos (None)</option>
+                        <option value="muslimisch">Muslimisch (Muslim)</option>
+                        <option value="juedisch">Jüdisch (Jewish)</option>
+                        <option value="orthodox">Orthodox</option>
+                        <option value="andere">Andere (Other)</option>
+                    </select>
+                    <div class="error-hint" id="religion_error"></div>
+                </div>
+
+                <!-- Marital Status -->
+                <div class="form-group">
+                    <label for="marital_status">
+                        Marital Status (Familienstand)
+                    </label>
+                    <select 
+                        id="marital_status" 
+                        name="marital_status"
+                        data-section="anmeldung"
+                        data-required="false"
+                    >
+                        <option value="">-- Select / Auswählen --</option>
+                        <option value="ledig">Ledig (Single)</option>
+                        <option value="verheiratet">Verheiratet (Married)</option>
+                        <option value="geschieden">Geschieden (Divorced)</option>
+                        <option value="verwitwet">Verwitwet (Widowed)</option>
+                        <option value="getrennt">Getrennt lebend (Separated)</option>
+                        <option value="eingetragene_lebenspartnerschaft">Eingetragene Lebenspartnerschaft (Civil Union)</option>
+                    </select>
+                    <div class="error-hint" id="marital_status_error"></div>
+                </div>
             </div>
 
             <!-- ========== KINDERGELD SECTION ========== -->
@@ -682,11 +780,11 @@
         <!-- Form Footer -->
         <div class="form-footer">
             <div class="field-counter">
-                Filled: <span id="filledCount">0</span> / <span id="totalCount">0</span> fields
+                Заповнено: <span id="filledCount">0</span> / <span id="totalCount">0</span> полів
             </div>
             <div class="draft-status" id="draftStatus">
                 <span class="icon">💾</span>
-                <span>Draft saved</span>
+                <span>Чернетка збережена</span>
             </div>
         </div>
     </div>
@@ -694,7 +792,7 @@
     <!-- Submit Button (Fixed at bottom) -->
     <div class="submit-container">
         <button type="button" class="submit-btn" id="submitBtn" disabled>
-            Submit
+            Згенерувати документ
         </button>
     </div>
 
@@ -710,21 +808,24 @@
                 docTypes: {
                     anmeldung: {
                         title: 'Anmeldung',
-                        description: 'Registration at place of residence',
+                        description: 'Реєстрація за місцем проживання',
                         sections: ['common', 'anmeldung'],
-                        submitText: 'Generate Document'
+                        submitText: 'Згенерувати документ',
+                        requiredFields: 9  // Updated count
                     },
                     kindergeld: {
                         title: 'Kindergeld',
-                        description: 'Child benefit application',
+                        description: 'Заява на допомогу на дітей',
                         sections: ['common', 'kindergeld'],
-                        submitText: 'Generate Document'
+                        submitText: 'Згенерувати документ',
+                        requiredFields: 5
                     },
                     flat: {
                         title: 'Wohnungsantrag',
-                        description: 'Housing application form',
+                        description: 'Заява на житло',
                         sections: ['common', 'flat'],
-                        submitText: 'Submit Application'
+                        submitText: 'Подати заяву',
+                        requiredFields: 5
                     }
                 },
                 defaultDocType: 'anmeldung',
@@ -854,7 +955,7 @@
                 
                 if (month < 1 || month > 12) return false;
                 if (day < 1 || day > 31) return false;
-                if (year < 1900 || year > 2025) return false;
+                if (year < 1900 || year > 2030) return false;
                 
                 return true;
             }
@@ -868,17 +969,30 @@
             }
 
             function formatDateInput(input) {
-                var value = input.value.replace(/\D/g, '');
+                // Allow digits and dots, remove other characters
+                var value = input.value.replace(/[^\d.]/g, '');
+                
+                // Auto-format: add dots after DD and MM
+                var digits = value.replace(/\./g, '');
                 var formatted = '';
                 
-                if (value.length > 0) {
-                    formatted = value.substring(0, 2);
+                if (digits.length > 0) {
+                    formatted = digits.substring(0, 2);
                 }
-                if (value.length > 2) {
-                    formatted += '.' + value.substring(2, 4);
+                if (digits.length > 2) {
+                    formatted += '.' + digits.substring(2, 4);
                 }
-                if (value.length > 4) {
-                    formatted += '.' + value.substring(4, 8);
+                if (digits.length > 4) {
+                    formatted += '.' + digits.substring(4, 8);
+                }
+                
+                // If user manually typed dots, preserve their input
+                if (value.includes('.') && value.length <= 10) {
+                    // Check if it looks like a valid date pattern
+                    if (/^\d{0,2}\.?\d{0,2}\.?\d{0,4}$/.test(value)) {
+                        input.value = value;
+                        return;
+                    }
                 }
                 
                 input.value = formatted;
@@ -971,12 +1085,12 @@
                     validationStatus.classList.remove('incomplete');
                     validationStatus.classList.add('complete');
                     statusIcon.textContent = '✅';
-                    statusText.textContent = 'Form ready to submit';
+                    statusText.textContent = 'Форма готова до відправки';
                 } else {
                     validationStatus.classList.remove('complete');
                     validationStatus.classList.add('incomplete');
                     statusIcon.textContent = '⚠️';
-                    statusText.textContent = 'Fill in the required fields';
+                    statusText.textContent = "Заповніть обов'язкові поля";
                 }
 
                 updateFieldCounter();
@@ -1158,7 +1272,7 @@
 
                 // Set loading state
                 isSubmitting = true;
-                submitBtn.textContent = 'Generating...';
+                submitBtn.textContent = 'Генеруємо...';
                 submitBtn.classList.add('loading');
                 submitBtn.disabled = true;
 
@@ -1215,7 +1329,7 @@
                     console.warn('To test: Open this WebApp via InlineKeyboardButton with web_app=WebAppInfo(url=...)');
                     
                     statusIcon.textContent = '✅';
-                    statusText.textContent = 'Data saved (test mode)';
+                    statusText.textContent = 'Дані збережено (тестовий режим)';
                     validationStatus.classList.remove('incomplete');
                     validationStatus.classList.add('complete');
                     
@@ -1233,23 +1347,20 @@
 
             // ============================================
             // TELEGRAM BACK BUTTON
+            // Back button просто закриває WebApp без відправки cancelled
+            // Дані залишаються в чернетці для продовження пізніше
             // ============================================
             
             if (tg && tg.BackButton) {
                 tg.BackButton.show();
                 tg.BackButton.onClick(function() {
-                    var payload = {
-                        doc_type: currentDocType,
-                        user_answers: {},
-                        status: 'cancelled'
-                    };
-                    tg.sendData(JSON.stringify(payload));
+                    // Просто закриваємо WebApp без відправки статусу
+                    // Чернетка вже збережена в localStorage
+                    console.log('Back button pressed - closing without sending cancelled status');
                     
-                    setTimeout(function() {
-                        if (tg.close) {
-                            tg.close();
-                        }
-                    }, 500);
+                    if (tg.close) {
+                        tg.close();
+                    }
                 });
             }
 
@@ -1276,6 +1387,7 @@
     </script>
 </body>
 </html>
+
 
 
 
