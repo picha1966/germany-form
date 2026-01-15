@@ -1627,77 +1627,84 @@
             // FORMAT STRICT:
             // { doc_type: currentDocType, user_answers: userAnswers }
             // ============================================
-            submitBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (isSubmitting) return;
+         submitBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
 
-                // Final validation
-                var allValid = true;
-                Object.keys(activeFields).forEach(function(id) {
-                    if (!validateField(id, true)) allValid = false;
-                });
+    // Final validation
+    var allValid = true;
+    Object.keys(activeFields).forEach(function(id) {
+        if (!validateField(id, true)) allValid = false;
+    });
 
-                if (!allValid) {
-                    submitBtn.classList.add('shake');
-                    setTimeout(function() { submitBtn.classList.remove('shake'); }, 400);
-                    return;
-                }
+    if (!allValid) {
+        submitBtn.classList.add('shake');
+        setTimeout(function() { submitBtn.classList.remove('shake'); }, 400);
+        return;
+    }
 
-                isSubmitting = true;
-                submitBtn.textContent = t("ui.generating", "Generating...");
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
+    isSubmitting = true;
+    submitBtn.textContent = t("ui.generating", "Generating...");
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
 
-                // Collect answers by NAME (contract keys)
-                var userAnswers = {};
-                Object.keys(activeFields).forEach(function(id) {
-                    var el = activeFields[id];
-                    var v = (el.value || '').trim();
-                    if (!v) return;
+    // Collect answers by NAME (contract keys)
+    var userAnswers = {};
+    Object.keys(activeFields).forEach(function(id) {
+        var el = activeFields[id];
+        var v = (el.value || '').trim();
+        if (!v) return;
 
-                    // send normalized iban/bic (optional, safe)
-                    if (el.name === "iban") v = normalizeIBAN(v);
-                    if (el.name === "bic") v = normalizeBIC(v);
+        if (el.name === "iban") v = normalizeIBAN(v);
+        if (el.name === "bic") v = normalizeBIC(v);
 
-                    userAnswers[el.name] = v;
-                });
+        userAnswers[el.name] = v;
+    });
 
-                var payload = {
-                    doc_type: currentDocType,
-                    user_answers: userAnswers
-                };
+    var payload = {
+        doc_type: currentDocType,
+        user_answers: userAnswers
+    };
 
-                // Clear draft on submit
-                try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch (e) {}
+    // 🔍 DEBUG — щоб ти бачив що реально відправляється
+    console.log("🚀 PAYLOAD TO TELEGRAM:");
+    console.log(payload);
+    console.log(JSON.stringify(payload));
 
-                if (tg && tg.sendData) {
-                    try {
-                        tg.sendData(JSON.stringify(payload));
-                        setTimeout(function() {
-                            if (tg.close) tg.close();
-                        }, 350);
-                    } catch (err) {
-                        // fallback: unlock button
-                        isSubmitting = false;
-                        submitBtn.textContent = t("ui.submit", "Submit");
-                        submitBtn.classList.remove('loading');
-                        updateUI();
-                    }
-                } else {
-                    // Not in Telegram: show success UI, keep open
-                    statusIcon.textContent = '✅';
-                    statusText.textContent = t("ui.ready", "Ready");
-                    validationStatus.classList.remove('incomplete');
-                    validationStatus.classList.add('complete');
+    // Clear draft
+    try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch (e) {}
 
-                    setTimeout(function() {
-                        isSubmitting = false;
-                        submitBtn.textContent = t("ui.submit", "Submit");
-                        submitBtn.classList.remove('loading');
-                        updateUI();
-                    }, 800);
-                }
-            });
+    if (tg && tg.sendData) {
+        try {
+            tg.sendData(JSON.stringify(payload));
+            console.log("✅ tg.sendData called");
+
+            // ❌ НЕ закриваємо WebApp тут
+            // tg.close() має викликатись ботом після отримання
+
+        } catch (err) {
+            console.error("❌ tg.sendData failed:", err);
+            isSubmitting = false;
+            submitBtn.textContent = t("ui.submit", "Submit");
+            submitBtn.classList.remove('loading');
+            updateUI();
+        }
+    } else {
+        console.warn("⚠️ WebApp not opened via Telegram");
+
+        statusIcon.textContent = '⚠️';
+        statusText.textContent = 'WebApp not connected to Telegram';
+        validationStatus.classList.remove('incomplete');
+        validationStatus.classList.add('complete');
+
+        setTimeout(function() {
+            isSubmitting = false;
+            submitBtn.textContent = t("ui.submit", "Submit");
+            submitBtn.classList.remove('loading');
+            updateUI();
+        }, 1000);
+    }
+});
 
             // ============================================
             // BACK BUTTON (no cancelled send)
@@ -1740,6 +1747,7 @@
     </script>
 </body>
 </html>
+
 
 
 
