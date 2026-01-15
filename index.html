@@ -944,17 +944,28 @@
             // ============================================
             // URL PARAMS: doc_type, lang
             // ============================================
-            function getParams() {
-                var params = new URLSearchParams(window.location.search);
-                return {
-                    docType: (params.get('doc_type') || 'anmeldung').toLowerCase(),
-                    lang: (params.get('lang') || 'ua').toLowerCase()
-                };
-            }
+           function getParams() {
+    var params = new URLSearchParams(window.location.search);
 
-            var P = getParams();
-            var currentDocType = P.docType;
-            var currentLang = P.lang;
+    var doc = params.get('doc_type') || 'anmeldung';
+    var lang = params.get('lang') || 'ua';
+
+    return {
+        docType: doc.toLowerCase(),
+        lang: lang.toLowerCase()
+    };
+}
+
+var P = getParams();
+var currentDocType = P.docType;
+var currentLang = P.lang;
+
+// 🔥 DEBUG – щоб ти бачив у консолі
+console.log("WEBAPP PARAMS:", {
+    doc_type: currentDocType,
+    lang: currentLang
+});
+
 
             // ============================================
             // TELEGRAM WEBAPP INIT
@@ -1792,6 +1803,7 @@ setTimeout(function() {
     </script>
 </body>
 </html>
+
 
 
 
