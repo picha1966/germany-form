@@ -1520,14 +1520,9 @@
 
             if (tg && tg.sendData) {
                 try {
-                   tg.sendData(JSON.stringify(payload));
-console.log('[WebApp] Data sent to Telegram', payload);
-
-// UI feedback — WebApp залишається відкритим
-if (statusText) {
-    statusText.textContent = '⏳ Дані надіслані. Очікую підтвердження від бота...';
-}
- 
+                    tg.sendData(JSON.stringify(payload));
+                    console.log('[WebApp] SENT TO TELEGRAM:', JSON.stringify(payload));
+                    // DO NOT CLOSE - bot will close after PDF is ready
                 } catch (err) {
                     console.error('[WebApp] sendData error:', err);
                     isSubmitting = false;
@@ -1571,6 +1566,7 @@ if (statusText) {
     </script>
 </body>
    
+
 
 
 
