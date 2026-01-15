@@ -1627,19 +1627,21 @@
             // FORMAT STRICT:
             // { doc_type: currentDocType, user_answers: userAnswers }
             // ============================================
-         submitBtn.addEventListener('click', function(e) {
+     submitBtn.addEventListener('click', function (e) {
     e.preventDefault();
     if (isSubmitting) return;
 
     // Final validation
     var allValid = true;
-    Object.keys(activeFields).forEach(function(id) {
+    Object.keys(activeFields).forEach(function (id) {
         if (!validateField(id, true)) allValid = false;
     });
 
     if (!allValid) {
         submitBtn.classList.add('shake');
-        setTimeout(function() { submitBtn.classList.remove('shake'); }, 400);
+        setTimeout(function () {
+            submitBtn.classList.remove('shake');
+        }, 400);
         return;
     }
 
@@ -1647,6 +1649,41 @@
     submitBtn.textContent = t("ui.generating", "Generating...");
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
+
+    // Collect answers
+    var userAnswers = {};
+    Object.keys(activeFields).forEach(function (id) {
+        var el = activeFields[id];
+        var v = (el.value || '').trim();
+        if (!v) return;
+
+        if (el.name === "iban") v = normalizeIBAN(v);
+        if (el.name === "bic") v = normalizeBIC(v);
+
+        userAnswers[el.name] = v;
+    });
+
+    var payload = {
+        doc_type: currentDocType,
+        user_answers: userAnswers
+    };
+
+    console.log("🚀 SEND TO TELEGRAM:", payload);
+
+    // ❗ CRITICAL FIX: DO NOT CLOSE WEBAPP
+    if (window.Telegram && Telegram.WebApp) {
+        try {
+            Telegram.WebApp.sendData(JSON.stringify(payload));
+        } catch (e) {
+            console.error("sendData failed", e);
+        }
+    } else {
+        console.error("Telegram WebApp not found");
+    }
+
+    // ❗ DO NOT CALL tg.close()
+});
+
 
     // Collect answers by NAME (contract keys)
     var userAnswers = {};
@@ -1755,6 +1792,7 @@ setTimeout(function() {
     </script>
 </body>
 </html>
+
 
 
 
