@@ -1266,16 +1266,13 @@ console.log("WEBAPP PARAMS:", {
             document.getElementById("opt_rel_other").textContent = t("select.rel.other", "Other");
 
             // Header title/description
-            formTitle.textContent =
-    (TEXTS[currentLang] && TEXTS[currentLang].title) || config.title;
+           // Header title / description from I18N
+formTitle.textContent = t("titles." + currentDocType, "Document");
+formDescription.textContent = t("descriptions." + currentDocType, "");
 
-formDescription.textContent =
-    (TEXTS[currentLang] && TEXTS[currentLang].description) || config.description;
-
-submitBtn.textContent =
-    (TEXTS[currentLang] && TEXTS[currentLang].submit) || config.submitText;
-
+submitBtn.textContent = t("ui.submit", "Submit");
 document.title = formTitle.textContent;
+
 
 
             // ============================================
@@ -1811,6 +1808,7 @@ setTimeout(function() {
     </script>
 </body>
 </html>
+
 
 
 
