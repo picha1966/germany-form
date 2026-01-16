@@ -1489,73 +1489,168 @@
      // ========================================
 // SUBMIT (ВИПРАВЛЕНИЙ ОБРОБНИК)
 // ========================================
+// ========================================
+// SUBMIT - ЗАЛІЗОБЕТОННА ВЕРСІЯ
+// ========================================
 submitBtn.addEventListener('click', function(e) {
     e.preventDefault();
-    if (isSubmitting) return;
+    
+    console.log('[WebApp] ========================================');
+    console.log('[WebApp] STEP 1: Submit button clicked');
+    console.log('[WebApp] ========================================');
+    
+    if (isSubmitting) {
+        console.log('[WebApp] ⚠️ Already submitting, skipping...');
+        return;
+    }
 
+    // STEP 2: Валідація всіх полів
+    console.log('[WebApp] STEP 2: Validating all fields...');
     var allValid = true;
+    var invalidFields = [];
+    
     Object.keys(activeFields).forEach(function(id) {
-        if (!validateField(id, true)) allValid = false;
+        if (!validateField(id, true)) {
+            allValid = false;
+            invalidFields.push(id);
+        }
     });
 
     if (!allValid) {
+        console.log('[WebApp] ❌ Validation failed for fields:', invalidFields);
         submitBtn.classList.add('shake');
         setTimeout(function() { submitBtn.classList.remove('shake'); }, 400);
         return;
     }
+    
+    console.log('[WebApp] ✅ All fields valid');
 
+    // STEP 3: Блокуємо кнопку та змінюємо стан
+    console.log('[WebApp] STEP 3: Locking submit button...');
     isSubmitting = true;
     submitBtn.textContent = t('ui.generating', 'Generating...');
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
 
+    // STEP 4: Збираємо дані з форми
+    console.log('[WebApp] STEP 4: Collecting form data...');
     var userAnswers = {};
+    var fieldCount = 0;
+    
     Object.keys(activeFields).forEach(function(id) {
         var el = activeFields[id];
         var v = (el.value || '').trim();
+        
         if (!v) return;
-        if (el.name === 'iban') v = normalizeIBAN(v);
-        if (el.name === 'bic') v = normalizeBIC(v);
+        
+        // Нормалізація спеціальних полів
+        if (el.name === 'iban') {
+            v = normalizeIBAN(v);
+            console.log('[WebApp] Normalized IBAN:', v);
+        }
+        if (el.name === 'bic') {
+            v = normalizeBIC(v);
+            console.log('[WebApp] Normalized BIC:', v);
+        }
+        
         userAnswers[el.name] = v;
+        fieldCount++;
     });
+    
+    console.log('[WebApp] ✅ Collected ' + fieldCount + ' fields');
+    console.log('[WebApp] User answers object:', userAnswers);
 
-    var payload = { 
-        doc_type: currentDocType, 
-        user_answers: userAnswers 
+    // STEP 5: Формуємо фінальний payload
+    console.log('[WebApp] STEP 5: Building payload...');
+    var payload = {
+        doc_type: currentDocType,
+        user_answers: userAnswers
     };
     
-    console.log('[WebApp] Preparing payload:', payload);
+    console.log('[WebApp] ✅ Final payload:');
+    console.log(JSON.stringify(payload, null, 2));
 
-    try { 
-        localStorage.removeItem(DRAFT_KEY); 
-    } catch (e) {}
+    // STEP 6: Видаляємо draft
+    console.log('[WebApp] STEP 6: Clearing draft...');
+    try {
+        localStorage.removeItem(DRAFT_KEY);
+        console.log('[WebApp] ✅ Draft cleared');
+    } catch (e) {
+        console.log('[WebApp] ⚠️ Could not clear draft:', e);
+    }
 
-    if (tg && typeof tg.sendData === 'function') {
-        try {
-            var jsonString = JSON.stringify(payload);
-            console.log('[WebApp] Sending to Telegram:', jsonString);
-            tg.sendData(jsonString);
-            console.log('[WebApp] ✅ Data sent successfully!');
-            
-            // Показуємо успіх користувачу
-            statusIcon.textContent = '✅';
-            statusText.textContent = t('ui.ready', 'Data sent!');
-            
-        } catch (err) {
-            console.error('[WebApp] ❌ sendData error:', err);
-            alert('Error sending data: ' + err.message);
-            isSubmitting = false;
-            submitBtn.textContent = t('ui.submit', 'Submit');
-            submitBtn.classList.remove('loading');
-            updateUI();
-        }
-    } else {
-        console.error('[WebApp] ❌ Telegram WebApp not available!');
-        console.log('[WebApp] tg object:', tg);
-        alert('Telegram WebApp is not initialized. Please open this page from Telegram bot.');
+    // STEP 7: Перевірка Telegram WebApp API
+    console.log('[WebApp] STEP 7: Checking Telegram WebApp API...');
+    console.log('[WebApp] window.Telegram exists:', !!window.Telegram);
+    console.log('[WebApp] window.Telegram.WebApp exists:', !!(window.Telegram && window.Telegram.WebApp));
+    
+    if (!window.Telegram || !window.Telegram.WebApp) {
+        console.error('[WebApp] ❌ CRITICAL: Telegram WebApp API not found!');
+        alert('ERROR: This page must be opened from Telegram bot.');
         isSubmitting = false;
         submitBtn.textContent = t('ui.submit', 'Submit');
         submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    var tg = window.Telegram.WebApp;
+    console.log('[WebApp] ✅ Telegram WebApp object:', tg);
+    console.log('[WebApp] tg.sendData type:', typeof tg.sendData);
+    console.log('[WebApp] tg.close type:', typeof tg.close);
+
+    // STEP 8: Відправка даних
+    console.log('[WebApp] STEP 8: Sending data to Telegram...');
+    
+    if (typeof tg.sendData !== 'function') {
+        console.error('[WebApp] ❌ CRITICAL: tg.sendData is not a function!');
+        alert('ERROR: Telegram WebApp sendData method not available.');
+        isSubmitting = false;
+        submitBtn.textContent = t('ui.submit', 'Submit');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        return;
+    }
+
+    try {
+        var jsonString = JSON.stringify(payload);
+        console.log('[WebApp] JSON string length:', jsonString.length);
+        console.log('[WebApp] JSON string:', jsonString);
+        console.log('[WebApp] 🚀 Calling tg.sendData()...');
+        
+        tg.sendData(jsonString);
+        
+        console.log('[WebApp] ✅✅✅ DATA SENT SUCCESSFULLY! ✅✅✅');
+        console.log('[WebApp] ========================================');
+        
+        // Оновлюємо UI
+        statusIcon.textContent = '✅';
+        statusText.textContent = 'Data sent!';
+        
+        // STEP 9: Закриваємо WebApp
+        console.log('[WebApp] STEP 9: Closing WebApp...');
+        if (typeof tg.close === 'function') {
+            setTimeout(function() {
+                console.log('[WebApp] 🚪 Calling tg.close()...');
+                tg.close();
+            }, 500);
+        } else {
+            console.log('[WebApp] ⚠️ tg.close() not available');
+        }
+        
+    } catch (err) {
+        console.error('[WebApp] ========================================');
+        console.error('[WebApp] ❌❌❌ SEND ERROR! ❌❌❌');
+        console.error('[WebApp] Error message:', err.message);
+        console.error('[WebApp] Error stack:', err.stack);
+        console.error('[WebApp] ========================================');
+        
+        alert('Error sending data to Telegram: ' + err.message);
+        
+        isSubmitting = false;
+        submitBtn.textContent = t('ui.submit', 'Submit');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
         updateUI();
     }
 });
@@ -1583,6 +1678,7 @@ submitBtn.addEventListener('click', function(e) {
     </script>
 </body>
    
+
 
 
 
