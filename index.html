@@ -86,8 +86,7 @@
             margin-left: 2px;
         }
         .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group select {
             width: 100%;
             padding: 14px 16px;
             font-size: 16px;
@@ -554,1203 +553,708 @@
     <div class="submit-container">
         <button type="button" class="submit-btn" id="submitBtn" disabled data-i18n="ui.submit">Submit</button>
     </div>
-<script>
-(function() {
-    'use strict';
 
-    // ========================================
-    // КРИТИЧНО: ОДНЕ ОГОЛОШЕННЯ TG НА ПОЧАТКУ
-    // ========================================
-    const tg = window.Telegram && window.Telegram.WebApp;
-    
-    console.log('[WebApp] ========================================');
-    console.log('[WebApp] INITIALIZATION');
-    console.log('[WebApp] ========================================');
-    console.log('[WebApp] window.Telegram:', window.Telegram);
-    console.log('[WebApp] tg:', tg);
-    console.log('[WebApp] tg.sendData:', tg ? tg.sendData : 'N/A');
-    
-    if (!tg) {
-        console.error('[WebApp] ❌ CRITICAL: Telegram WebApp API NOT AVAILABLE!');
-        alert('❌ ПОМИЛКА!\n\nWebApp може працювати ТІЛЬКИ через Telegram бот.\n\nВідкрийте цю сторінку через кнопку в боті!');
-    } else {
-        console.log('[WebApp] ✅ Telegram WebApp API available');
-        tg.ready();
-        tg.expand();
-        console.log('[WebApp] ✅ tg.ready() and tg.expand() called');
-    }
+    <script>
+    (function() {
+        'use strict';
 
-    // ========================================
-    // TRANSLATIONS
-    // ========================================
-    const TRANSLATIONS = {
-        ua: {
-            title: { anmeldung: 'Anmeldung (Реєстрація)', kindergeld: 'Kindergeld (Допомога на дітей)' },
-            description: { anmeldung: 'Реєстрація за місцем проживання', kindergeld: 'Заява на допомогу на дітей' },
-            section: {
-                personal: 'Особисті дані',
-                address: 'Адреса проживання',
-                housing: 'Житлові дані',
-                bank: 'Банківські реквізити',
-                child: 'Дані дитини',
-                signature: 'Підпис'
-            },
-            label: {
-                first_name: "Ім'я",
-                last_name: 'Прізвище',
-                birth_date: 'Дата народження',
-                birth_place: 'Місце народження',
-                nationality: 'Громадянство',
-                marital_status: 'Сімейний стан',
-                religion: 'Віросповідання',
-                street: 'Вулиця',
-                house_number: 'Номер будинку',
-                postal_code: 'Поштовий індекс (PLZ)',
-                city: 'Місто',
-                previous_address: 'Попередня адреса',
-                move_in_date: 'Дата заїзду',
-                landlord_name: 'ПІБ орендодавця',
-                iban: 'IBAN',
-                bic: 'BIC',
-                account_holder: 'Власник рахунку',
-                child_first_name: "Ім'я дитини",
-                child_last_name: 'Прізвище дитини',
-                child_birth_date: 'Дата народження дитини',
-                child_birth_place: 'Місце народження дитини',
-                child_nationality: 'Громадянство дитини',
-                signature_place: 'Місто (для підпису)',
-                signature_date: 'Дата (для підпису)'
-            },
-            placeholder: {
-                first_name: "Введіть ваше ім'я",
-                last_name: 'Введіть ваше прізвище',
-                birth_date: 'ДД.ММ.РРРР',
-                birth_place: 'напр., Київ',
-                nationality: 'напр., ukrainisch',
-                street: 'напр., Hauptstraße',
-                house_number: 'напр., 15a',
-                postal_code: '12345',
-                city: 'напр., Berlin',
-                previous_address: 'напр., Alte Straße 15, 10117 Berlin',
-                move_in_date: 'ДД.ММ.РРРР',
-                landlord_name: "Повне ім'я орендодавця",
-                iban: 'DE00 0000 0000 0000 0000 00',
-                bic: 'COBADEFFXXX',
-                account_holder: 'напр., Max Mustermann',
-                child_first_name: "Введіть ім'я дитини",
-                child_last_name: 'Введіть прізвище дитини',
-                child_birth_date: 'ДД.ММ.РРРР',
-                child_birth_place: 'напр., Berlin',
-                child_nationality: 'напр., deutsch',
-                signature_place: 'напр., Berlin',
-                signature_date: 'ДД.ММ.РРРР'
-            },
-            error: {
-                min2: 'Мінімум 2 символи',
-                required: "Обов'язкове поле",
-                date: 'Формат: ДД.ММ.РРРР',
-                plz: 'Рівно 5 цифр',
-                iban: 'Введіть коректний IBAN',
-                bic: '8-11 символів',
-                select: 'Оберіть значення',
-                cyrillic: 'Використовуйте латинські літери'
-            },
-            select: {
-                empty: '-- Оберіть --',
-                marital: {
-                    single: 'Неодружений/неодружена',
-                    married: 'Одружений/заміжня',
-                    divorced: 'Розлучений/розлучена',
-                    widowed: 'Вдівець/вдова',
-                    separated: 'Окремо проживає',
-                    civil_union: 'Цивільне партнерство'
-                },
-                religion: {
-                    none: 'Немає',
-                    protestant: 'Протестантство',
-                    catholic: 'Католицизм',
-                    orthodox: 'Православ\'я',
-                    muslim: 'Іслам',
-                    jewish: 'Іудаїзм',
-                    other: 'Інше'
-                }
-            },
-            ui: {
-                incomplete: "Заповніть обов'язкові поля",
-                ready: 'Форма готова до відправки',
-                filled: 'Заповнено:',
-                fields: 'полів',
-                submit: 'Згенерувати PDF',
-                sending: 'Відправляємо...',
-                error_empty: 'Будь ласка, заповніть всі обов\'язкові поля!',
-                error_validation: 'Деякі поля заповнені неправильно'
+        console.log('🔄 [INIT] Script starting...');
+
+        // ========================================
+        // 1. ПЕРЕВІРКА TELEGRAM WEBAPP (3 секунди таймаут)
+        // ========================================
+        let tg = null;
+        let tgReady = false;
+        let initAttempts = 0;
+        const MAX_INIT_ATTEMPTS = 30; // 30 * 100ms = 3 seconds
+
+        function initTelegram() {
+            initAttempts++;
+            console.log(`⏳ [INIT] Attempt ${initAttempts}/${MAX_INIT_ATTEMPTS} - Checking Telegram API...`);
+
+            if (window.Telegram && window.Telegram.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+                tgReady = true;
+                
+                console.log('✅ [INIT] Telegram WebApp loaded successfully!');
+                console.log('   Platform:', tg.platform);
+                console.log('   Version:', tg.version);
+                console.log('   sendData:', typeof tg.sendData);
+                
+                return true;
             }
-        },
-        de: {
-            title: { anmeldung: 'Anmeldung', kindergeld: 'Kindergeld' },
-            description: { anmeldung: 'Wohnsitz-Anmeldung', kindergeld: 'Antrag auf Kindergeld' },
-            section: {
-                personal: 'Persönliche Daten',
-                address: 'Anschrift',
-                housing: 'Wohnungsdaten',
-                bank: 'Bankverbindung',
-                child: 'Angaben zum Kind',
-                signature: 'Unterschrift'
-            },
-            label: {
-                first_name: 'Vorname',
-                last_name: 'Nachname',
-                birth_date: 'Geburtsdatum',
-                birth_place: 'Geburtsort',
-                nationality: 'Staatsangehörigkeit',
-                marital_status: 'Familienstand',
-                religion: 'Religionszugehörigkeit',
-                street: 'Straße',
-                house_number: 'Hausnummer',
-                postal_code: 'Postleitzahl (PLZ)',
-                city: 'Ort',
-                previous_address: 'Bisherige Anschrift',
-                move_in_date: 'Einzugsdatum',
-                landlord_name: 'Wohnungsgeber (Name)',
-                iban: 'IBAN',
-                bic: 'BIC',
-                account_holder: 'Kontoinhaber',
-                child_first_name: 'Vorname des Kindes',
-                child_last_name: 'Nachname des Kindes',
-                child_birth_date: 'Geburtsdatum des Kindes',
-                child_birth_place: 'Geburtsort des Kindes',
-                child_nationality: 'Staatsangehörigkeit des Kindes',
-                signature_place: 'Ort (Unterschrift)',
-                signature_date: 'Datum (Unterschrift)'
-            },
-            placeholder: {
-                first_name: 'Vornamen eingeben',
-                last_name: 'Nachnamen eingeben',
-                birth_date: 'TT.MM.JJJJ',
-                birth_place: 'z.B. Berlin',
-                nationality: 'z.B. deutsch',
-                street: 'z.B. Hauptstraße',
-                house_number: 'z.B. 15a',
-                postal_code: '12345',
-                city: 'z.B. Berlin',
-                previous_address: 'z.B. Alte Straße 15, 10117 Berlin',
-                move_in_date: 'TT.MM.JJJJ',
-                landlord_name: 'Vollständiger Name',
-                iban: 'DE00 0000 0000 0000 0000 00',
-                bic: 'COBADEFFXXX',
-                account_holder: 'z.B. Max Mustermann',
-                child_first_name: 'Vornamen eingeben',
-                child_last_name: 'Nachnamen eingeben',
-                child_birth_date: 'TT.MM.JJJJ',
-                child_birth_place: 'z.B. Berlin',
-                child_nationality: 'z.B. deutsch',
-                signature_place: 'z.B. Berlin',
-                signature_date: 'TT.MM.JJJJ'
-            },
-            error: {
-                min2: 'Mindestens 2 Zeichen',
-                required: 'Pflichtfeld',
-                date: 'Format: TT.MM.JJJJ',
-                plz: 'Genau 5 Ziffern',
-                iban: 'Gültige IBAN eingeben',
-                bic: '8-11 Zeichen',
-                select: 'Bitte auswählen',
-                cyrillic: 'Verwenden Sie lateinische Buchstaben'
-            },
-            select: {
-                empty: '-- Auswählen --',
-                marital: {
-                    single: 'Ledig',
-                    married: 'Verheiratet',
-                    divorced: 'Geschieden',
-                    widowed: 'Verwitwet',
-                    separated: 'Getrennt lebend',
-                    civil_union: 'Eingetragene Lebenspartnerschaft'
-                },
-                religion: {
-                    none: 'Keine',
-                    protestant: 'Evangelisch',
-                    catholic: 'Katholisch',
-                    orthodox: 'Orthodox',
-                    muslim: 'Muslimisch',
-                    jewish: 'Jüdisch',
-                    other: 'Andere'
-                }
-            },
-            ui: {
-                incomplete: 'Bitte Pflichtfelder ausfüllen',
-                ready: 'Formular bereit zum Absenden',
-                filled: 'Ausgefüllt:',
-                fields: 'Felder',
-                submit: 'PDF erstellen',
-                sending: 'Sende...',
-                error_empty: 'Bitte füllen Sie alle Pflichtfelder aus!',
-                error_validation: 'Einige Felder sind nicht korrekt ausgefüllt'
+
+            if (initAttempts >= MAX_INIT_ATTEMPTS) {
+                console.error('❌ [INIT] Telegram WebApp failed to load after 3 seconds');
+                
+                document.body.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:20px;text-align:center;font-family:sans-serif;background:#f5f5f5;">
+                        <div style="background:white;border-radius:16px;padding:32px;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                            <div style="font-size:48px;margin-bottom:16px;">❌</div>
+                            <h2 style="font-size:20px;margin-bottom:12px;color:#e53935;">Помилка завантаження</h2>
+                            <p style="font-size:14px;color:#666;line-height:1.5;margin-bottom:20px;">
+                                WebApp не завантажився протягом 3 секунд.<br><br>
+                                <strong>Можливі причини:</strong><br>
+                                • Ця сторінка відкрита не через Telegram бот<br>
+                                • Повільне інтернет-з'єднання<br>
+                                • Застаріла версія Telegram<br><br>
+                                <strong>Рішення:</strong><br>
+                                1. Закрийте цю сторінку<br>
+                                2. Відкрийте бот в Telegram<br>
+                                3. Натисніть кнопку "Заповнити анкету"
+                            </p>
+                            <button onclick="window.close()" style="background:#3390ec;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">
+                                Закрити
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return false;
             }
-        },
-        en: {
-            title: { anmeldung: 'Registration (Anmeldung)', kindergeld: 'Child Benefit (Kindergeld)' },
-            description: { anmeldung: 'Residence registration', kindergeld: 'Child benefit application' },
-            section: {
-                personal: 'Personal Information',
-                address: 'Address',
-                housing: 'Housing Information',
-                bank: 'Bank Details',
-                child: 'Child Information',
-                signature: 'Signature'
-            },
-            label: {
-                first_name: 'First Name',
-                last_name: 'Last Name',
-                birth_date: 'Date of Birth',
-                birth_place: 'Place of Birth',
-                nationality: 'Nationality',
-                marital_status: 'Marital Status',
-                religion: 'Religion',
-                street: 'Street',
-                house_number: 'House Number',
-                postal_code: 'Postal Code',
-                city: 'City',
-                previous_address: 'Previous Address',
-                move_in_date: 'Move-in Date',
-                landlord_name: 'Landlord Name',
-                iban: 'IBAN',
-                bic: 'BIC',
-                account_holder: 'Account Holder',
-                child_first_name: 'Child\'s First Name',
-                child_last_name: 'Child\'s Last Name',
-                child_birth_date: 'Child\'s Date of Birth',
-                child_birth_place: 'Child\'s Place of Birth',
-                child_nationality: 'Child\'s Nationality',
-                signature_place: 'Place (Signature)',
-                signature_date: 'Date (Signature)'
-            },
-            placeholder: {
-                first_name: 'Enter first name',
-                last_name: 'Enter last name',
-                birth_date: 'DD.MM.YYYY',
-                birth_place: 'e.g. London',
-                nationality: 'e.g. British',
-                street: 'e.g. Main Street',
-                house_number: 'e.g. 15a',
-                postal_code: '12345',
-                city: 'e.g. Berlin',
-                previous_address: 'e.g. Old Street 15, 10117 Berlin',
-                move_in_date: 'DD.MM.YYYY',
-                landlord_name: 'Full name',
-                iban: 'DE00 0000 0000 0000 0000 00',
-                bic: 'COBADEFFXXX',
-                account_holder: 'e.g. Max Mustermann',
-                child_first_name: 'Enter child\'s first name',
-                child_last_name: 'Enter child\'s last name',
-                child_birth_date: 'DD.MM.YYYY',
-                child_birth_place: 'e.g. Berlin',
-                child_nationality: 'e.g. German',
-                signature_place: 'e.g. Berlin',
-                signature_date: 'DD.MM.YYYY'
-            },
-            error: {
-                min2: 'Minimum 2 characters',
-                required: 'Required field',
-                date: 'Format: DD.MM.YYYY',
-                plz: 'Exactly 5 digits',
-                iban: 'Enter valid IBAN',
-                bic: '8-11 characters',
-                select: 'Please select',
-                cyrillic: 'Use Latin characters'
-            },
-            select: {
-                empty: '-- Select --',
-                marital: {
-                    single: 'Single',
-                    married: 'Married',
-                    divorced: 'Divorced',
-                    widowed: 'Widowed',
-                    separated: 'Separated',
-                    civil_union: 'Civil Partnership'
-                },
-                religion: {
-                    none: 'None',
-                    protestant: 'Protestant',
-                    catholic: 'Catholic',
-                    orthodox: 'Orthodox',
-                    muslim: 'Muslim',
-                    jewish: 'Jewish',
-                    other: 'Other'
-                }
-            },
-            ui: {
-                incomplete: 'Please fill required fields',
-                ready: 'Form ready to submit',
-                filled: 'Filled:',
-                fields: 'fields',
-                submit: 'Generate PDF',
-                sending: 'Sending...',
-                error_empty: 'Please fill all required fields!',
-                error_validation: 'Some fields are not correctly filled'
-            }
-        },
-        tr: {
-            title: { anmeldung: 'Kayıt (Anmeldung)', kindergeld: 'Çocuk Parası (Kindergeld)' },
-            description: { anmeldung: 'İkamet kaydı', kindergeld: 'Çocuk parası başvurusu' },
-            section: {
-                personal: 'Kişisel Bilgiler',
-                address: 'Adres',
-                housing: 'Konut Bilgileri',
-                bank: 'Banka Bilgileri',
-                child: 'Çocuk Bilgileri',
-                signature: 'İmza'
-            },
-            label: {
-                first_name: 'Ad',
-                last_name: 'Soyad',
-                birth_date: 'Doğum Tarihi',
-                birth_place: 'Doğum Yeri',
-                nationality: 'Uyruk',
-                marital_status: 'Medeni Durum',
-                religion: 'Din',
-                street: 'Sokak',
-                house_number: 'Ev Numarası',
-                postal_code: 'Posta Kodu',
-                city: 'Şehir',
-                previous_address: 'Önceki Adres',
-                move_in_date: 'Taşınma Tarihi',
-                landlord_name: 'Ev Sahibi Adı',
-                iban: 'IBAN',
-                bic: 'BIC',
-                account_holder: 'Hesap Sahibi',
-                child_first_name: 'Çocuğun Adı',
-                child_last_name: 'Çocuğun Soyadı',
-                child_birth_date: 'Çocuğun Doğum Tarihi',
-                child_birth_place: 'Çocuğun Doğum Yeri',
-                child_nationality: 'Çocuğun Uyruğu',
-                signature_place: 'Yer (İmza)',
-                signature_date: 'Tarih (İmza)'
-            },
-            placeholder: {
-                first_name: 'Adınızı girin',
-                last_name: 'Soyadınızı girin',
-                birth_date: 'GG.AA.YYYY',
-                birth_place: 'örn. İstanbul',
-                nationality: 'örn. Türk',
-                street: 'örn. Ana Cadde',
-                house_number: 'örn. 15a',
-                postal_code: '12345',
-                city: 'örn. Berlin',
-                previous_address: 'örn. Eski Sokak 15, 10117 Berlin',
-                move_in_date: 'GG.AA.YYYY',
-                landlord_name: 'Tam ad',
-                iban: 'DE00 0000 0000 0000 0000 00',
-                bic: 'COBADEFFXXX',
-                account_holder: 'örn. Max Mustermann',
-                child_first_name: 'Çocuğun adını girin',
-                child_last_name: 'Çocuğun soyadını girin',
-                child_birth_date: 'GG.AA.YYYY',
-                child_birth_place: 'örn. Berlin',
-                child_nationality: 'örn. Alman',
-                signature_place: 'örn. Berlin',
-                signature_date: 'GG.AA.YYYY'
-            },
-            error: {
-                min2: 'En az 2 karakter',
-                required: 'Zorunlu alan',
-                date: 'Format: GG.AA.YYYY',
-                plz: 'Tam 5 rakam',
-                iban: 'Geçerli IBAN girin',
-                bic: '8-11 karakter',
-                select: 'Lütfen seçin',
-                cyrillic: 'Latin harfleri kullanın'
-            },
-            select: {
-                empty: '-- Seçin --',
-                marital: {
-                    single: 'Bekar',
-                    married: 'Evli',
-                    divorced: 'Boşanmış',
-                    widowed: 'Dul',
-                    separated: 'Ayrı yaşıyor',
-                    civil_union: 'Sivil Birlik'
-                },
-                religion: {
-                    none: 'Yok',
-                    protestant: 'Protestan',
-                    catholic: 'Katolik',
-                    orthodox: 'Ortodoks',
-                    muslim: 'Müslüman',
-                    jewish: 'Yahudi',
-                    other: 'Diğer'
-                }
-            },
-            ui: {
-                incomplete: 'Lütfen zorunlu alanları doldurun',
-                ready: 'Form göndermeye hazır',
-                filled: 'Dolduruldu:',
-                fields: 'alan',
-                submit: 'PDF Oluştur',
-                sending: 'Gönderiliyor...',
-                error_empty: 'Lütfen tüm zorunlu alanları doldurun!',
-                error_validation: 'Bazı alanlar doğru doldurulmamış'
-            }
-        }
-    };
 
-    // ========================================
-    // URL PARAMS
-    // ========================================
-    function getUrlParams() {
-        const params = new URLSearchParams(window.location.search);
-        let docType = (params.get('doc_type') || 'anmeldung').toLowerCase();
-        let lang = (params.get('lang') || 'ua').toLowerCase();
-        
-        if (lang === 'uk') lang = 'ua';
-        
-        const supported = ['ua', 'de', 'en', 'tr'];
-        if (!supported.includes(lang)) lang = 'ua';
-        
-        return { docType, lang };
-    }
-
-    const PARAMS = getUrlParams();
-    const currentDocType = PARAMS.docType;
-    const currentLang = PARAMS.lang;
-    
-    console.log('[WebApp] Document type:', currentDocType);
-    console.log('[WebApp] Language:', currentLang);
-
-    // ========================================
-    // TRANSLATION FUNCTION
-    // ========================================
-    function t(path) {
-        const keys = path.split('.');
-        let obj = TRANSLATIONS[currentLang] || TRANSLATIONS.ua;
-        
-        for (let i = 0; i < keys.length; i++) {
-            if (!obj || typeof obj !== 'object') return path;
-            obj = obj[keys[i]];
-        }
-        
-        return obj || path;
-    }
-
-    // ========================================
-    // APPLY TRANSLATIONS
-    // ========================================
-    function applyTranslations() {
-        console.log('[WebApp] Applying translations...');
-        
-        document.getElementById('formTitle').textContent = t('title.' + currentDocType);
-        document.getElementById('formDescription').textContent = t('description.' + currentDocType);
-        document.title = t('title.' + currentDocType);
-        
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            el.textContent = t(el.getAttribute('data-i18n'));
-        });
-        
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
-        });
-        
-        console.log('[WebApp] ✅ Translations applied');
-    }
-
-    // ========================================
-    // DOC TYPE CONFIG
-    // ========================================
-    const DOCS = {
-        anmeldung: { sections: ['personal', 'address', 'housing', 'signature'] },
-        kindergeld: { sections: ['personal', 'address', 'bank', 'child', 'signature'] }
-    };
-
-    // ========================================
-    // SECTIONS VISIBILITY
-    // ========================================
-    const sectionMap = {
-        personal: document.getElementById('section_personal'),
-        address: document.getElementById('section_address'),
-        housing: document.getElementById('section_housing'),
-        bank: document.getElementById('section_bank'),
-        child: document.getElementById('section_child'),
-        signature: document.getElementById('section_signature')
-    };
-
-    Object.keys(sectionMap).forEach(k => {
-        if (sectionMap[k]) sectionMap[k].classList.remove('visible');
-    });
-    
-    DOCS[currentDocType].sections.forEach(k => {
-        if (sectionMap[k]) sectionMap[k].classList.add('visible');
-    });
-
-    if (currentDocType === 'kindergeld') {
-        const pg = document.getElementById('group_previous_address');
-        const mg = document.getElementById('group_move_in_date');
-        if (pg) pg.style.display = 'none';
-        if (mg) mg.style.display = 'none';
-    }
-
-    // ========================================
-    // COLLECT ACTIVE FIELDS
-    // ========================================
-    const form = document.getElementById('masterForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const statusIcon = document.getElementById('statusIcon');
-    const statusText = document.getElementById('statusText');
-    const validationStatus = document.getElementById('validationStatus');
-    const filledCountEl = document.getElementById('filledCount');
-    const totalCountEl = document.getElementById('totalCount');
-    
-    let activeFields = {};
-    let errorHints = {};
-    let isSubmitting = false;
-
-    function collectActiveFields() {
-        activeFields = {};
-        errorHints = {};
-        
-        const allControls = form.querySelectorAll('input, select');
-        allControls.forEach(ctrl => {
-            const section = ctrl.closest('.form-section');
-            if (!section || !section.classList.contains('visible')) return;
-            
-            const group = ctrl.closest('.form-group');
-            if (group && group.style.display === 'none') return;
-            
-            activeFields[ctrl.id] = ctrl;
-            const hint = document.getElementById('err_' + ctrl.id);
-            if (hint) errorHints[ctrl.id] = hint;
-        });
-        
-        let requiredCount = 0;
-        Object.keys(activeFields).forEach(id => {
-            if (activeFields[id].getAttribute('data-required') === 'true') requiredCount++;
-        });
-        
-        totalCountEl.textContent = requiredCount;
-    }
-
-    collectActiveFields();
-
-    // ========================================
-    // VALIDATION FUNCTIONS
-    // ========================================
-    function isValidDate(value) {
-        if (!value) return false;
-        const m = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-        if (!m) return false;
-        const d = parseInt(m[1], 10), mo = parseInt(m[2], 10), y = parseInt(m[3], 10);
-        return mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && y >= 1900 && y <= 2100;
-    }
-
-    function formatDateInput(input) {
-        const digits = input.value.replace(/[^\d]/g, '');
-        let formatted = '';
-        if (digits.length > 0) formatted = digits.substring(0, 2);
-        if (digits.length > 2) formatted += '.' + digits.substring(2, 4);
-        if (digits.length > 4) formatted += '.' + digits.substring(4, 8);
-        input.value = formatted;
-    }
-
-    function isValidPLZ(value) {
-        return /^\d{5}$/.test(value);
-    }
-
-    function normalizeIBAN(raw) {
-        return (raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-    }
-
-    function formatIBAN(raw) {
-        const v = normalizeIBAN(raw);
-        let formatted = '';
-        for (let i = 0; i < v.length; i++) {
-            if (i > 0 && i % 4 === 0) formatted += ' ';
-            formatted += v[i];
-        }
-        return formatted.trim();
-    }
-
-    function isValidIBAN(value) {
-        const v = normalizeIBAN(value);
-        return v.length >= 15 && v.length <= 34 && /^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(v);
-    }
-
-    function normalizeBIC(raw) {
-        return (raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-    }
-
-    function isValidBIC(value) {
-        const v = normalizeBIC(value);
-        return /^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(v);
-    }
-
-    function hasCyrillic(text) {
-        return /[а-яёА-ЯЁ]/.test(text);
-    }
-
-    function validateField(fieldId, showError) {
-        const input = activeFields[fieldId];
-        if (!input) return true;
-        
-        const hint = errorHints[fieldId];
-        const value = (input.value || '').trim();
-        const format = input.getAttribute('data-format');
-        const minLen = parseInt(input.getAttribute('data-min'), 10) || 0;
-        const isReq = input.getAttribute('data-required') === 'true';
-        let valid = true;
-
-        input.classList.remove('valid', 'invalid');
-        if (hint) hint.classList.remove('visible');
-
-        if (!isReq && !value) return true;
-        if (isReq && !value) {
-            if (showError) {
-                input.classList.add('invalid');
-                if (hint) {
-                    hint.textContent = t('error.required');
-                    hint.classList.add('visible');
-                }
-            }
+            setTimeout(initTelegram, 100);
             return false;
         }
 
-        if (currentLang !== 'ua' && ['first_name', 'last_name', 'nationality', 'birth_place', 'city', 'street'].includes(fieldId)) {
-            if (hasCyrillic(value)) {
-                if (hint) {
-                    hint.textContent = t('error.cyrillic');
-                    hint.classList.add('visible');
+        initTelegram();
+
+        // ========================================
+        // TRANSLATIONS
+        // ========================================
+        const TRANSLATIONS = {
+            ua: {
+                title: { anmeldung: 'Anmeldung (Реєстрація)', kindergeld: 'Kindergeld (Допомога на дітей)' },
+                description: { anmeldung: 'Реєстрація за місцем проживання', kindergeld: 'Заява на допомогу на дітей' },
+                section: {
+                    personal: 'Особисті дані',
+                    address: 'Адреса проживання',
+                    housing: 'Житлові дані',
+                    bank: 'Банківські реквізити',
+                    child: 'Дані дитини',
+                    signature: 'Підпис'
+                },
+                label: {
+                    first_name: "Ім'я",
+                    last_name: 'Прізвище',
+                    birth_date: 'Дата народження',
+                    birth_place: 'Місце народження',
+                    nationality: 'Громадянство',
+                    marital_status: 'Сімейний стан',
+                    religion: 'Віросповідання',
+                    street: 'Вулиця',
+                    house_number: 'Номер будинку',
+                    postal_code: 'Поштовий індекс (PLZ)',
+                    city: 'Місто',
+                    previous_address: 'Попередня адреса',
+                    move_in_date: 'Дата заїзду',
+                    landlord_name: 'ПІБ орендодавця',
+                    iban: 'IBAN',
+                    bic: 'BIC',
+                    account_holder: 'Власник рахунку',
+                    child_first_name: "Ім'я дитини",
+                    child_last_name: 'Прізвище дитини',
+                    child_birth_date: 'Дата народження дитини',
+                    child_birth_place: 'Місце народження дитини',
+                    child_nationality: 'Громадянство дитини',
+                    signature_place: 'Місто (для підпису)',
+                    signature_date: 'Дата (для підпису)'
+                },
+                placeholder: {
+                    first_name: "Введіть ваше ім'я",
+                    last_name: 'Введіть ваше прізвище',
+                    birth_date: 'ДД.ММ.РРРР',
+                    birth_place: 'напр., Київ',
+                    nationality: 'напр., ukrainisch',
+                    street: 'напр., Hauptstraße',
+                    house_number: 'напр., 15a',
+                    postal_code: '12345',
+                    city: 'напр., Berlin',
+                    previous_address: 'напр., Alte Straße 15, 10117 Berlin',
+                    move_in_date: 'ДД.ММ.РРРР',
+                    landlord_name: "Повне ім'я орендодавця",
+                    iban: 'DE00 0000 0000 0000 0000 00',
+                    bic: 'COBADEFFXXX',
+                    account_holder: 'напр., Max Mustermann',
+                    child_first_name: "Введіть ім'я дитини",
+                    child_last_name: 'Введіть прізвище дитини',
+                    child_birth_date: 'ДД.ММ.РРРР',
+                    child_birth_place: 'напр., Berlin',
+                    child_nationality: 'напр., deutsch',
+                    signature_place: 'напр., Berlin',
+                    signature_date: 'ДД.ММ.РРРР'
+                },
+                error: {
+                    min2: 'Мінімум 2 символи',
+                    required: "Обов'язкове поле",
+                    date: 'Формат: ДД.ММ.РРРР',
+                    plz: 'Рівно 5 цифр',
+                    iban: 'Введіть коректний IBAN',
+                    bic: '8-11 символів',
+                    select: 'Оберіть значення',
+                    cyrillic: 'Використовуйте латинські літери'
+                },
+                select: {
+                    empty: '-- Оберіть --',
+                    marital: {
+                        single: 'Неодружений/неодружена',
+                        married: 'Одружений/заміжня',
+                        divorced: 'Розлучений/розлучена',
+                        widowed: 'Вдівець/вдова',
+                        separated: 'Окремо проживає',
+                        civil_union: 'Цивільне партнерство'
+                    },
+                    religion: {
+                        none: 'Немає',
+                        protestant: 'Протестантство',
+                        catholic: 'Католицизм',
+                        orthodox: 'Православ\'я',
+                        muslim: 'Іслам',
+                        jewish: 'Іудаїзм',
+                        other: 'Інше'
+                    }
+                },
+                ui: {
+                    incomplete: "Заповніть обов'язкові поля",
+                    ready: 'Форма готова до відправки',
+                    filled: 'Заповнено:',
+                    fields: 'полів',
+                    submit: 'Згенерувати PDF',
+                    sending: 'Відправляємо...',
+                    error_empty: 'Будь ласка, заповніть всі обов\'язкові поля!',
+                    error_validation: 'Деякі поля заповнені неправильно'
                 }
-                input.classList.add('invalid');
+            }
+        };
+
+        // ========================================
+        // URL PARAMS
+        // ========================================
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            let docType = (params.get('doc_type') || 'anmeldung').toLowerCase();
+            let lang = (params.get('lang') || 'ua').toLowerCase();
+            
+            if (lang === 'uk') lang = 'ua';
+            
+            const supported = ['ua'];
+            if (!supported.includes(lang)) lang = 'ua';
+            
+            return { docType, lang };
+        }
+
+        const PARAMS = getUrlParams();
+        const currentDocType = PARAMS.docType;
+        const currentLang = PARAMS.lang;
+        
+        console.log('📄 [CONFIG] Document:', currentDocType);
+        console.log('🌍 [CONFIG] Language:', currentLang);
+
+        // ========================================
+        // TRANSLATION FUNCTION
+        // ========================================
+        function t(path) {
+            const keys = path.split('.');
+            let obj = TRANSLATIONS[currentLang] || TRANSLATIONS.ua;
+            
+            for (let i = 0; i < keys.length; i++) {
+                if (!obj || typeof obj !== 'object') return path;
+                obj = obj[keys[i]];
+            }
+            
+            return obj || path;
+        }
+
+        // ========================================
+        // APPLY TRANSLATIONS
+        // ========================================
+        function applyTranslations() {
+            document.getElementById('formTitle').textContent = t('title.' + currentDocType);
+            document.getElementById('formDescription').textContent = t('description.' + currentDocType);
+            document.title = t('title.' + currentDocType);
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.textContent = t(el.getAttribute('data-i18n'));
+            });
+            
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+            });
+        }
+
+        // ========================================
+        // DOC TYPE CONFIG
+        // ========================================
+        const DOCS = {
+            anmeldung: { sections: ['personal', 'address', 'housing', 'signature'] },
+            kindergeld: { sections: ['personal', 'address', 'bank', 'child', 'signature'] }
+        };
+
+        // ========================================
+        // SECTIONS VISIBILITY
+        // ========================================
+        const sectionMap = {
+            personal: document.getElementById('section_personal'),
+            address: document.getElementById('section_address'),
+            housing: document.getElementById('section_housing'),
+            bank: document.getElementById('section_bank'),
+            child: document.getElementById('section_child'),
+            signature: document.getElementById('section_signature')
+        };
+
+        Object.keys(sectionMap).forEach(k => {
+            if (sectionMap[k]) sectionMap[k].classList.remove('visible');
+        });
+        
+        DOCS[currentDocType].sections.forEach(k => {
+            if (sectionMap[k]) sectionMap[k].classList.add('visible');
+        });
+
+        if (currentDocType === 'kindergeld') {
+            const pg = document.getElementById('group_previous_address');
+            const mg = document.getElementById('group_move_in_date');
+            if (pg) pg.style.display = 'none';
+            if (mg) mg.style.display = 'none';
+        }
+
+        // ========================================
+        // COLLECT ACTIVE FIELDS
+        // ========================================
+        const form = document.getElementById('masterForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusText = document.getElementById('statusText');
+        const validationStatus = document.getElementById('validationStatus');
+        const filledCountEl = document.getElementById('filledCount');
+        const totalCountEl = document.getElementById('totalCount');
+        
+        let activeFields = {};
+        let errorHints = {};
+        let isSubmitting = false;
+
+        function collectActiveFields() {
+            activeFields = {};
+            errorHints = {};
+            
+            const allControls = form.querySelectorAll('input, select');
+            allControls.forEach(ctrl => {
+                const section = ctrl.closest('.form-section');
+                if (!section || !section.classList.contains('visible')) return;
+                
+                const group = ctrl.closest('.form-group');
+                if (group && group.style.display === 'none') return;
+                
+                activeFields[ctrl.id] = ctrl;
+                const hint = document.getElementById('err_' + ctrl.id);
+                if (hint) errorHints[ctrl.id] = hint;
+            });
+            
+            let requiredCount = 0;
+            Object.keys(activeFields).forEach(id => {
+                if (activeFields[id].getAttribute('data-required') === 'true') requiredCount++;
+            });
+            
+            totalCountEl.textContent = requiredCount;
+        }
+
+        collectActiveFields();
+
+        // ========================================
+        // VALIDATION FUNCTIONS
+        // ========================================
+        function isValidDate(value) {
+            if (!value) return false;
+            const m = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+            if (!m) return false;
+            const d = parseInt(m[1], 10), mo = parseInt(m[2], 10), y = parseInt(m[3], 10);
+            return mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && y >= 1900 && y <= 2100;
+        }
+
+        function formatDateInput(input) {
+            const digits = input.value.replace(/[^\d]/g, '');
+            let formatted = '';
+            if (digits.length > 0) formatted = digits.substring(0, 2);
+            if (digits.length > 2) formatted += '.' + digits.substring(2, 4);
+            if (digits.length > 4) formatted += '.' + digits.substring(4, 8);
+            input.value = formatted;
+        }
+
+        function isValidPLZ(value) {
+            return /^\d{5}$/.test(value);
+        }
+
+        function normalizeIBAN(raw) {
+            return (raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        }
+
+        function formatIBAN(raw) {
+            const v = normalizeIBAN(raw);
+            let formatted = '';
+            for (let i = 0; i < v.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += v[i];
+            }
+            return formatted.trim();
+        }
+
+        function isValidIBAN(value) {
+            const v = normalizeIBAN(value);
+            return v.length >= 15 && v.length <= 34 && /^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(v);
+        }
+
+        function normalizeBIC(raw) {
+            return (raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        }
+
+        function isValidBIC(value) {
+            const v = normalizeBIC(value);
+            return /^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(v);
+        }
+
+        function hasCyrillic(text) {
+            return /[а-яёА-ЯЁ]/.test(text);
+        }
+
+        function validateField(fieldId, showError) {
+            const input = activeFields[fieldId];
+            if (!input) return true;
+            
+            const hint = errorHints[fieldId];
+            const value = (input.value || '').trim();
+            const format = input.getAttribute('data-format');
+            const minLen = parseInt(input.getAttribute('data-min'), 10) || 0;
+            const isReq = input.getAttribute('data-required') === 'true';
+            let valid = true;
+
+            input.classList.remove('valid', 'invalid');
+            if (hint) hint.classList.remove('visible');
+
+            if (!isReq && !value) return true;
+            if (isReq && !value) {
+                if (showError) {
+                    input.classList.add('invalid');
+                    if (hint) {
+                        hint.textContent = t('error.required');
+                        hint.classList.add('visible');
+                    }
+                }
                 return false;
             }
+
+            if (currentLang !== 'ua' && ['first_name', 'last_name', 'nationality', 'birth_place', 'city', 'street'].includes(fieldId)) {
+                if (hasCyrillic(value)) {
+                    if (hint) {
+                        hint.textContent = t('error.cyrillic');
+                        hint.classList.add('visible');
+                    }
+                    input.classList.add('invalid');
+                    return false;
+                }
+            }
+
+            if (format === 'date') valid = isValidDate(value);
+            else if (format === 'plz') valid = isValidPLZ(value);
+            else if (format === 'iban') valid = isValidIBAN(value);
+            else if (format === 'bic') valid = isValidBIC(value);
+            else if (minLen > 0) valid = value.length >= minLen;
+            else if (input.tagName === 'SELECT' && isReq) valid = value.length > 0;
+
+            if (valid) {
+                input.classList.add('valid');
+            } else if (showError || value) {
+                input.classList.add('invalid');
+                if (hint) hint.classList.add('visible');
+            }
+            
+            return valid;
         }
 
-        if (format === 'date') valid = isValidDate(value);
-        else if (format === 'plz') valid = isValidPLZ(value);
-        else if (format === 'iban') valid = isValidIBAN(value);
-        else if (format === 'bic') valid = isValidBIC(value);
-        else if (minLen > 0) valid = value.length >= minLen;
-        else if (input.tagName === 'SELECT' && isReq) valid = value.length > 0;
-
-        if (valid) {
-            input.classList.add('valid');
-        } else if (showError || value) {
-            input.classList.add('invalid');
-            if (hint) hint.classList.add('visible');
+        function canSubmit() {
+            let allValid = true;
+            Object.keys(activeFields).forEach(id => {
+                const inp = activeFields[id];
+                if (inp.getAttribute('data-required') !== 'true') return;
+                
+                const v = (inp.value || '').trim();
+                if (!v) {
+                    allValid = false;
+                    return;
+                }
+                
+                const fmt = inp.getAttribute('data-format');
+                const minL = parseInt(inp.getAttribute('data-min'), 10) || 0;
+                
+                if (fmt === 'date' && !isValidDate(v)) allValid = false;
+                else if (fmt === 'plz' && !isValidPLZ(v)) allValid = false;
+                else if (fmt === 'iban' && !isValidIBAN(v)) allValid = false;
+                else if (fmt === 'bic' && !isValidBIC(v)) allValid = false;
+                else if (minL > 0 && v.length < minL) allValid = false;
+                
+                if (currentLang !== 'ua' && ['first_name', 'last_name', 'nationality', 'birth_place', 'city', 'street'].includes(id)) {
+                    if (hasCyrillic(v)) allValid = false;
+                }
+            });
+            return allValid;
         }
-        
-        return valid;
-    }
 
-    function canSubmit() {
-        let allValid = true;
+        function updateFieldCounter() {
+            let count = 0;
+            Object.keys(activeFields).forEach(id => {
+                if (activeFields[id].getAttribute('data-required') === 'true' && (activeFields[id].value || '').trim()) {
+                    count++;
+                }
+            });
+            filledCountEl.textContent = count;
+        }
+
+        function updateUI() {
+            const ready = canSubmit();
+            submitBtn.disabled = !ready || isSubmitting;
+            
+            if (ready) {
+                validationStatus.classList.remove('incomplete');
+                validationStatus.classList.add('complete');
+                statusIcon.textContent = '✅';
+                statusText.textContent = t('ui.ready');
+            } else {
+                validationStatus.classList.remove('complete');
+                validationStatus.classList.add('incomplete');
+                statusIcon.textContent = '⚠️';
+                statusText.textContent = t('ui.incomplete');
+            }
+            
+            updateFieldCounter();
+        }
+
+        // ========================================
+        // INPUT EVENTS
+        // ========================================
         Object.keys(activeFields).forEach(id => {
             const inp = activeFields[id];
-            if (inp.getAttribute('data-required') !== 'true') return;
-            
-            const v = (inp.value || '').trim();
-            if (!v) {
-                allValid = false;
-                return;
-            }
-            
             const fmt = inp.getAttribute('data-format');
-            const minL = parseInt(inp.getAttribute('data-min'), 10) || 0;
-            
-            if (fmt === 'date' && !isValidDate(v)) allValid = false;
-            else if (fmt === 'plz' && !isValidPLZ(v)) allValid = false;
-            else if (fmt === 'iban' && !isValidIBAN(v)) allValid = false;
-            else if (fmt === 'bic' && !isValidBIC(v)) allValid = false;
-            else if (minL > 0 && v.length < minL) allValid = false;
-            
-            if (currentLang !== 'ua' && ['first_name', 'last_name', 'nationality', 'birth_place', 'city', 'street'].includes(id)) {
-                if (hasCyrillic(v)) allValid = false;
-            }
-        });
-        return allValid;
-    }
 
-    function updateFieldCounter() {
-        let count = 0;
-        Object.keys(activeFields).forEach(id => {
-            if (activeFields[id].getAttribute('data-required') === 'true' && (activeFields[id].value || '').trim()) {
-                count++;
-            }
-        });
-        filledCountEl.textContent = count;
-    }
-
-    function updateUI() {
-        const ready = canSubmit();
-        submitBtn.disabled = !ready || isSubmitting;
-        
-        if (ready) {
-            validationStatus.classList.remove('incomplete');
-            validationStatus.classList.add('complete');
-            statusIcon.textContent = '✅';
-            statusText.textContent = t('ui.ready');
-        } else {
-            validationStatus.classList.remove('complete');
-            validationStatus.classList.add('incomplete');
-            statusIcon.textContent = '⚠️';
-            statusText.textContent = t('ui.incomplete');
-        }
-        
-        updateFieldCounter();
-    }
-
-    // ========================================
-    // INPUT EVENTS
-    // ========================================
-    Object.keys(activeFields).forEach(id => {
-        const inp = activeFields[id];
-        const fmt = inp.getAttribute('data-format');
-
-        inp.addEventListener('input', () => {
-            if (fmt === 'date') formatDateInput(inp);
-            else if (fmt === 'plz') inp.value = inp.value.replace(/\D/g, '').slice(0, 5);
-            else if (fmt === 'iban') inp.value = formatIBAN(inp.value).slice(0, 42);
-            else if (fmt === 'bic') inp.value = normalizeBIC(inp.value).slice(0, 11);
-            
-            validateField(id, false);
-            updateUI();
-        });
-
-        inp.addEventListener('blur', () => {
-            const v = (inp.value || '').trim();
-            if (v || inp.getAttribute('data-required') === 'true') {
-                validateField(id, true);
-            }
-        });
-
-        if (inp.tagName === 'SELECT') {
-            inp.addEventListener('change', () => {
+            inp.addEventListener('input', () => {
+                // 3. ЛОГУВАННЯ
+                console.log(`📝 [INPUT] Field changed: ${id}`);
+                
+                // 5. НОРМАЛІЗАЦІЯ ДАНИХ (автоматична очистка пробілів)
+                if (fmt === 'date') formatDateInput(inp);
+                else if (fmt === 'plz') inp.value = inp.value.replace(/\D/g, '').slice(0, 5);
+                else if (fmt === 'iban') {
+                    console.log(`🔄 [NORMALIZE] IBAN before: "${inp.value}"`);
+                    inp.value = formatIBAN(inp.value).slice(0, 42);
+                    console.log(`🔄 [NORMALIZE] IBAN after: "${inp.value}"`);
+                }
+                else if (fmt === 'bic') {
+                    console.log(`🔄 [NORMALIZE] BIC before: "${inp.value}"`);
+                    inp.value = normalizeBIC(inp.value).slice(0, 11);
+                    console.log(`🔄 [NORMALIZE] BIC after: "${inp.value}"`);
+                }
+                
                 validateField(id, false);
                 updateUI();
             });
+
+            inp.addEventListener('blur', () => {
+                const v = (inp.value || '').trim();
+                if (v || inp.getAttribute('data-required') === 'true') {
+                    validateField(id, true);
+                }
+            });
+
+            if (inp.tagName === 'SELECT') {
+                inp.addEventListener('change', () => {
+                    validateField(id, false);
+                    updateUI();
+                });
+            }
+        });
+
+        // ========================================
+        // 2. SUBMIT HANDLER З try...catch
+        // ========================================
+        function submitForm(e) {
+            if (e) e.preventDefault();
+            
+            console.log('═══════════════════════════════════════════════════════════');
+            console.log('🚀 [SUBMIT] BUTTON CLICKED');
+            console.log('═══════════════════════════════════════════════════════════');
+            
+            // 4. СТІЙКІСТЬ ДО ПОМИЛОК - try...catch навколо всієї логіки
+            try {
+                if (isSubmitting) {
+                    console.log('⏸️ [SUBMIT] Already submitting');
+                    return;
+                }
+                
+                // 3. ЛОГУВАННЯ: Валідація
+                console.log('✅ [STAGE 1] Validation...');
+                
+                let allValid = true;
+                let emptyFields = [];
+                
+                Object.keys(activeFields).forEach(id => {
+                    const field = activeFields[id];
+                    const isValid = validateField(id, true);
+                    
+                    if (!isValid) {
+                        allValid = false;
+                        if (field.getAttribute('data-required') === 'true' && !(field.value || '').trim()) {
+                            emptyFields.push(id);
+                        }
+                    }
+                });
+                
+                console.log(`   - All valid: ${allValid}`);
+                console.log(`   - Empty fields: ${emptyFields.length}`);
+                
+                if (!allValid) {
+                    console.log('❌ [STAGE 1] FAILED');
+                    submitBtn.classList.add('shake');
+                    setTimeout(() => submitBtn.classList.remove('shake'), 400);
+                    
+                    if (tg && typeof tg.showAlert === 'function') {
+                        tg.showAlert(t('ui.error_empty'));
+                    } else {
+                        alert(t('ui.error_empty'));
+                    }
+                    return;
+                }
+                
+                console.log('✅ [STAGE 1] PASSED');
+                
+                // 3. ЛОГУВАННЯ: Блокування кнопки
+                console.log('✅ [STAGE 2] Disabling button...');
+                isSubmitting = true;
+                submitBtn.textContent = t('ui.sending');
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                console.log('✅ [STAGE 2] PASSED');
+                
+                // 3. ЛОГУВАННЯ + 5. НОРМАЛІЗАЦІЯ: Збір даних
+                console.log('✅ [STAGE 3] Collecting data...');
+                const formData = {};
+                
+                Object.keys(activeFields).forEach(id => {
+                    const el = activeFields[id];
+                    let v = (el.value || '').trim();
+                    
+                    if (!v) return;
+                    
+                    // 5. НОРМАЛІЗАЦІЯ ДАНИХ (остаточна очистка перед відправкою)
+                    if (el.name === 'iban') {
+                        const original = v;
+                        v = normalizeIBAN(v); // Видаляє ВСІ пробіли
+                        console.log(`   🔄 [NORMALIZE] ${el.name}: "${original}" → "${v}"`);
+                    }
+                    if (el.name === 'bic') {
+                        const original = v;
+                        v = normalizeBIC(v); // Видаляє ВСІ пробіли
+                        console.log(`   🔄 [NORMALIZE] ${el.name}: "${original}" → "${v}"`);
+                    }
+                    
+                    formData[el.name] = v;
+                    console.log(`   ✅ Field: ${el.name} = ${v.substring(0, 30)}${v.length > 30 ? '...' : ''}`);
+                });
+                
+                console.log(`   - Total fields: ${Object.keys(formData).length}`);
+                console.log('✅ [STAGE 3] PASSED');
+                
+                // 3. ЛОГУВАННЯ: Створення payload
+                console.log('✅ [STAGE 4] Creating payload...');
+                const payload = {
+                    doc_type: currentDocType,
+                    user_answers: formData,  // ✅ КРИТИЧНО: "user_answers"
+                    status: 'success'
+                };
+                console.log('   - doc_type:', payload.doc_type);
+                console.log('   - user_answers keys:', Object.keys(payload.user_answers).join(', '));
+                console.log('   - status:', payload.status);
+                console.log('✅ [STAGE 4] PASSED');
+                
+                // 3. ЛОГУВАННЯ: Перевірка Telegram API
+                console.log('✅ [STAGE 5] Checking Telegram API...');
+                if (!tg || typeof tg.sendData !== 'function') {
+                    throw new Error('Telegram WebApp API недоступний! Відкрийте форму через бот.');
+                }
+                console.log('✅ [STAGE 5] PASSED');
+                
+                // 3. ЛОГУВАННЯ: Конвертація в JSON
+                console.log('✅ [STAGE 6] Converting to JSON...');
+                const jsonPayload = JSON.stringify(payload);
+                console.log(`   - JSON length: ${jsonPayload.length} chars`);
+                console.log(`   - JSON preview: ${jsonPayload.substring(0, 200)}...`);
+                console.log('✅ [STAGE 6] PASSED');
+                
+                // 3. ЛОГУВАННЯ: Відправка
+                console.log('═══════════════════════════════════════════════════════════');
+                console.log('📤 [STAGE 7] CALLING tg.sendData()...');
+                console.log('═══════════════════════════════════════════════════════════');
+                
+                // 2. ОБРОБКА sendData З ЗАТРИМКОЮ 100-200ms ДЛЯ tg.close()
+                tg.sendData(jsonPayload);
+                
+                console.log('✅✅✅ [STAGE 7] SUCCESS! DATA SENT! ✅✅✅');
+                console.log('═══════════════════════════════════════════════════════════');
+                
+                // Закриття через 150ms
+                setTimeout(() => {
+                    console.log('🚪 [CLOSE] Calling tg.close()...');
+                    if (tg.close) tg.close();
+                }, 150);
+                
+            } catch (error) {
+                // 4. СТІЙКІСТЬ ДО ПОМИЛОК - обробка будь-яких помилок
+                console.error('═══════════════════════════════════════════════════════════');
+                console.error('❌❌❌ [ERROR] SUBMIT FAILED');
+                console.error('═══════════════════════════════════════════════════════════');
+                console.error('Error:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                console.error('═══════════════════════════════════════════════════════════');
+                
+                if (tg && typeof tg.showAlert === 'function') {
+                    tg.showAlert('Помилка: ' + error.message);
+                } else {
+                    alert('Помилка: ' + error.message);
+                }
+                
+                // Скинути стан
+                isSubmitting = false;
+                submitBtn.textContent = t('ui.submit');
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
         }
-    });
 
-    // ========================================
-    // КРИТИЧНО: SUBMIT HANDLER
-    // ========================================
-  // ============================================================================
-// БЛОК 1: ПОВНА ФУНКЦІЯ submitForm() ДЛЯ index.html
-// ============================================================================
-// Замініть весь код SUBMIT HANDLER (від рядка ~1339 до ~1443)
-// Шукайте коментар: // ========================================
-//                    // SUBMIT HANDLER
-//                    // ========================================
+        submitBtn.addEventListener('click', submitForm);
+        form.addEventListener('submit', submitForm);
 
-// ========================================
-// SUBMIT HANDLER - ФІНАЛЬНА ВЕРСІЯ
-// ========================================
-function submitForm(e) {
-    if (e) e.preventDefault();
-    
-    // ЦЕ ТВОЯ ПЕРЕВІРКА - ВОНА МАЄ ВИСКОЧИТИ В ТЕЛЕГРАМІ
-    alert("🚀 ТЕСТ: Кнопка натиснута, починаю відправку!");
-
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log('🚀 SUBMIT FUNCTION CALLED');
-    console.log('═══════════════════════════════════════════════════════════');
-    
-    if (isSubmitting) {
-        console.log('⏸️ Already submitting, ignoring duplicate click');
-        return;
-    }
-    
-    // КРОК 1: ВАЛІДАЦІЯ
-    var allValid = true;
-    Object.keys(activeFields).forEach(function(id) {
-        if (!validateField(id, true)) allValid = false;
-    });
-    
-    if (!allValid) {
-        submitBtn.classList.add('shake');
-        setTimeout(function() { submitBtn.classList.remove('shake'); }, 400);
-        alert("❌ Будь ласка, заповніть усі обов'язкові поля!");
-        return;
-    }
-    
-    // КРОК 2: СТАН ВІДПРАВКИ
-    isSubmitting = true;
-    submitBtn.textContent = "Генеруємо..."; 
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-
-    // КРОК 3: ЗБІР ДАНИХ
-    var formData = {};
-    Object.keys(activeFields).forEach(function(id) {
-        var el = activeFields[id];
-        var v = (el.value || '').trim();
-        if (v) formData[el.name] = v;
-    });
-
-    // КРОК 4: ФОРМУВАННЯ ПАКЕТА (user_answers!)
-    var payload = {
-        doc_type: currentDocType,
-        user_answers: formData,
-        status: 'success'
-    };
-
-    // КРОК 5: ПЕРЕВІРКА TELEGRAM API
-    if (!window.Telegram || !window.Telegram.WebApp) {
-        alert("❌ Помилка: Telegram WebApp API не знайдено!");
-        isSubmitting = false;
-        submitBtn.textContent = "ЗГЕНЕРУВАТИ PDF";
-        submitBtn.disabled = false;
-        return;
-    }
-
-    var tg = window.Telegram.WebApp;
-
-    // КРОК 6: ВІДПРАВКА ДАНИХ
-    try {
-        var jsonPayload = JSON.stringify(payload);
-        console.log('📄 Sending JSON:', jsonPayload);
-        
-        tg.sendData(jsonPayload); // ВІДПРАВКА В БОТ
-        
-        alert("✅ ДАНІ ВІДПРАВЛЕНО! Закриваю вікно...");
-        
-        setTimeout(function() {
-            tg.close(); // ЗАКРИТТЯ АНКЕТИ
-        }, 200);
-
-    } catch (err) {
-        console.error('❌ Помилка відправки:', err);
-        alert('Помилка: ' + err.message);
-        isSubmitting = false;
-        submitBtn.textContent = "ЗГЕНЕРУВАТИ PDF";
-        submitBtn.disabled = false;
-    }
-    console.log('═══════════════════════════════════════════════════════════');
-}
-    console.log('✅ Step 1 PASSED: All fields valid');
-    console.log('✅ Step 2: Setting submitting state...');
-    
-    // КРОК 2: БЛОКУВАННЯ ПОВТОРНОЇ ВІДПРАВКИ
-    isSubmitting = true;
-    submitBtn.textContent = t('ui.sending');
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-    
-    console.log('✅ Step 2 PASSED: Button disabled');
-    console.log('✅ Step 3: Collecting form data...');
-    
-    // КРОК 3: ЗБІР ДАНИХ З ФОРМИ
-    var formData = {};
-    var fieldCount = 0;
-    
-    Object.keys(activeFields).forEach(function(id) {
-        var el = activeFields[id];
-        var v = (el.value || '').trim();
-        
-        if (!v) {
-            console.log('   ⏭️ Skipping empty field:', id);
-            return;
-        }
-        
-        // Нормалізація спеціальних полів
-        if (el.name === 'iban') {
-            var original = v;
-            v = normalizeIBAN(v);
-            console.log('   🔄 Normalized IBAN:', original, '→', v);
-        }
-        if (el.name === 'bic') {
-            var original = v;
-            v = normalizeBIC(v);
-            console.log('   🔄 Normalized BIC:', original, '→', v);
-        }
-        
-        formData[el.name] = v;
-        fieldCount++;
-        console.log('   ✅ Added field:', el.name, '=', v.substring(0, 50) + (v.length > 50 ? '...' : ''));
-    });
-    
-    console.log('📊 Form data collected:');
-    console.log('   - Total fields:', fieldCount);
-    console.log('   - Field names:', Object.keys(formData));
-    console.log('✅ Step 3 PASSED: Form data collected');
-    console.log('✅ Step 4: Creating payload...');
-    
-    // КРОК 4: ФОРМУВАННЯ PAYLOAD (КРИТИЧНО ВАЖЛИВА СТРУКТУРА!)
-    var payload = {
-        doc_type: currentDocType,
-        user_answers: formData,  // ← КРИТИЧНО: ключ "user_answers", НЕ "form_data"!
-        status: 'success'
-    };
-    
-    console.log('📦 Payload structure:');
-    console.log('   - doc_type:', payload.doc_type);
-    console.log('   - user_answers keys:', Object.keys(payload.user_answers));
-    console.log('   - user_answers count:', Object.keys(payload.user_answers).length);
-    console.log('   - status:', payload.status);
-    console.log('📦 Full payload object:', payload);
-    console.log('✅ Step 4 PASSED: Payload created');
-    console.log('✅ Step 5: Checking Telegram API...');
-    
-    // КРОК 5: ПЕРЕВІРКА НАЯВНОСТІ TELEGRAM API
-    console.log('🔍 Telegram API check:');
-    console.log('   - window.Telegram exists:', !!window.Telegram);
-    console.log('   - tg exists:', !!tg);
-    console.log('   - tg.sendData exists:', !!(tg && tg.sendData));
-    console.log('   - typeof tg.sendData:', tg ? typeof tg.sendData : 'N/A');
-    
-    if (!tg || typeof tg.sendData !== 'function') {
-        console.error('❌ CRITICAL ERROR: Telegram WebApp API not available!');
-        console.error('   This means the form was NOT opened through Telegram bot');
-        console.error('   The form MUST be opened by clicking the button in Telegram');
-        console.log('═══════════════════════════════════════════════════════════');
-        
-        alert('❌ ПОМИЛКА!\n\nWebApp може працювати ТІЛЬКИ через Telegram бот.\n\nВідкрийте форму натиснувши кнопку в боті.');
-        
-        // Скинути стан
-        isSubmitting = false;
-        submitBtn.textContent = t('ui.submit');
-        submitBtn.classList.remove('loading');
-        updateUI();
-        return;
-    }
-    
-    console.log('✅ Step 5 PASSED: Telegram API available');
-    console.log('✅ Step 6: Converting to JSON...');
-    
-    // КРОК 6: КОНВЕРТАЦІЯ В JSON
-    var jsonPayload;
-    try {
-        jsonPayload = JSON.stringify(payload);
-        console.log('📄 JSON payload:');
-        console.log('   - Length:', jsonPayload.length, 'characters');
-        console.log('   - First 200 chars:', jsonPayload.substring(0, 200));
-        console.log('   - Full JSON:', jsonPayload);
-        console.log('✅ Step 6 PASSED: JSON created successfully');
-    } catch (jsonError) {
-        console.error('❌ Step 6 FAILED: JSON.stringify error:', jsonError);
-        console.log('═══════════════════════════════════════════════════════════');
-        
-        alert('❌ Помилка конвертації даних: ' + jsonError.message);
-        
-        isSubmitting = false;
-        submitBtn.textContent = t('ui.submit');
-        submitBtn.classList.remove('loading');
-        updateUI();
-        return;
-    }
-    console.log('✅ Step 7: Sending data via tg.sendData()...');
-    
-    // КРОК 7: ВІДПРАВКА ДАНИХ В TELEGRAM
-    try {
-        tg.sendData(jsonPayload);
-        console.log('✅✅✅ SUCCESS! tg.sendData() CALLED ✅✅✅');
-        console.log('👋 Closing WebApp...');
-        
-        // Закриваємо вікно анкети через 100мс
-        setTimeout(function() {
-            tg.close();
-        }, 100);
-        
-    } catch (sendError) {
-        console.error('❌ Step 7 FAILED: tg.sendData error:', sendError);
-        alert('❌ Помилка відправки в Telegram: ' + sendError.message);
-        
-        isSubmitting = false;
-        if (submitBtn) {
-            submitBtn.textContent = t('ui.submit');
-            submitBtn.classList.remove('loading');
-        }
-    }
-    console.log('═══════════════════════════════════════════════════════════');
-}
-    
-    console.log('✅ Step 7: Sending data to bot...');
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log('📤 CALLING tg.sendData()...');
-    console.log('═══════════════════════════════════════════════════════════');
-    
-    // КРОК 7: ВІДПРАВКА ДАНИХ БОТУ
-    try {
-        tg.sendData(jsonPayload);
-        
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('✅✅✅ SUCCESS! tg.sendData() CALLED ✅✅✅');
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('📊 Summary:');
-        console.log('   - Document type:', currentDocType);
-        console.log('   - Fields sent:', fieldCount);
-        console.log('   - Payload size:', jsonPayload.length, 'chars');
-        console.log('   - Status: Data sent to bot successfully');
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('⏳ WebApp will close automatically in 500ms...');
-        
-        // Показати повідомлення користувачу
-        if (tg && typeof tg.showPopup === 'function') {
-            tg.showPopup({
-                title: '✅ Успіх!',
-                message: 'Дані відправлено боту. Зачекайте, генеруємо PDF...',
-                buttons: [{type: 'close'}]
+        // ========================================
+        // BACK BUTTON
+        // ========================================
+        if (tg && tg.BackButton) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                if (tg.close) tg.close();
             });
         }
-        
-        // Закрити WebApp через 500мс
-        setTimeout(function() {
-            console.log('🚪 Calling tg.close()...');
-            if (tg.close) {
-                tg.close();
-                console.log('✅ tg.close() called - WebApp should close now');
-            }
-        }, 500);
-        
-    } catch (sendError) {
-        console.error('═══════════════════════════════════════════════════════════');
-        console.error('❌❌❌ CRITICAL ERROR IN tg.sendData() ❌❌❌');
-        console.error('═══════════════════════════════════════════════════════════');
-        console.error('Error object:', sendError);
-        console.error('Error name:', sendError.name);
-        console.error('Error message:', sendError.message);
-        console.error('Error stack:', sendError.stack);
-        console.error('═══════════════════════════════════════════════════════════');
-        
-        var errorMsg = 'Помилка відправки даних:\n' + (sendError.message || 'Невідома помилка');
-        if (tg && typeof tg.showAlert === 'function') {
-            tg.showAlert(errorMsg);
-        } else {
-            alert(errorMsg);
-        }
-        
-        // Скинути стан
-        isSubmitting = false;
-        submitBtn.textContent = t('ui.submit');
-        submitBtn.classList.remove('loading');
+
+        // ========================================
+        // INITIALIZE
+        // ========================================
+        applyTranslations();
         updateUI();
-    }
-}
+        
+        console.log('✅ [INIT] Complete!');
+        console.log('✅ [INIT] Ready to use');
 
-// ПРИВ'ЯЗАТИ ФУНКЦІЮ ДО КНОПКИ
-submitBtn.addEventListener('click', submitForm);
-
-// Також обробити submit форми
-form.addEventListener('submit', submitForm);
-
-console.log('✅ submitForm() function registered');
-console.log('✅ Event listeners attached to button and form');
-
-        // ✅ 3. PAYLOAD STRUCTURE (як ви просили)
-       const payload = {
-            doc_type: currentDocType,
-            user_answers: formData,  // ✅ ОСЬ ТУТ МИ ЗМІНИЛИ form_data НА user_answers
-            status: 'success'
-        };
-
-        console.log('[WebApp] ========================================');
-        console.log('[WebApp] PAYLOAD READY');
-        console.log('[WebApp] ========================================');
-        console.log('[WebApp] doc_type:', payload.doc_type);
-        console.log('[WebApp] user_answers fields:', Object.keys(payload.user_answers).length);
-        console.log('[WebApp] user_answers:', payload.user_answers);
-        console.log('[WebApp] status:', payload.status);
-        console.log('[WebApp] Full payload:', JSON.stringify(payload, null, 2));
-
-        // ✅ 2. SEND DATA (як ви просили - tg.sendData)
-        if (!tg || typeof tg.sendData !== 'function') {
-            console.error('[WebApp] ❌ CRITICAL: Telegram WebApp API not available!');
-            console.error('[WebApp] tg:', tg);
-            console.error('[WebApp] typeof tg.sendData:', typeof (tg ? tg.sendData : undefined));
-            
-            alert('❌ ПОМИЛКА!\n\nTelegram WebApp API недоступний.\n\nВідкрийте форму через кнопку в Telegram боті!');
-            
-            isSubmitting = false;
-            submitBtn.textContent = t('ui.submit');
-            submitBtn.classList.remove('loading');
-            updateUI();
-            return;
-        }
-
-        try {
-            const jsonPayload = JSON.stringify(payload);
-            
-            console.log('[WebApp] ========================================');
-            console.log('[WebApp] CALLING tg.sendData()');
-            console.log('[WebApp] ========================================');
-            console.log('[WebApp] JSON payload length:', jsonPayload.length);
-            console.log('[WebApp] JSON payload:', jsonPayload);
-            
-            // ✅ SEND DATA TO BOT
-            tg.sendData(jsonPayload);
-            
-            console.log('[WebApp] ✅✅✅ tg.sendData() CALLED SUCCESSFULLY! ✅✅✅');
-            console.log('[WebApp] Data has been sent to the bot');
-            console.log('[WebApp] WebApp should close automatically now...');
-            
-            // Show success message
-            alert('✅ Дані відправлено боту!\n\nЗараз форма закриється автоматично.');
-            
-            // ✅ 4. CLOSE WEBAPP (як ви просили)
-            setTimeout(() => {
-                console.log('[WebApp] Calling tg.close()...');
-                if (tg.close) {
-                    tg.close();
-                    console.log('[WebApp] ✅ tg.close() called');
-                }
-            }, 500);
-            
-        } catch (error) {
-            console.error('[WebApp] ❌❌❌ CRITICAL ERROR in sendData() ❌❌❌');
-            console.error('[WebApp] Error:', error);
-            console.error('[WebApp] Error message:', error.message);
-            console.error('[WebApp] Error stack:', error.stack);
-            
-            const errorMsg = 'Помилка відправки:\n' + (error.message || 'Невідома помилка');
-            if (tg && typeof tg.showAlert === 'function') {
-                tg.showAlert(errorMsg);
-            } else {
-                alert(errorMsg);
-            }
-            
-            isSubmitting = false;
-            submitBtn.textContent = t('ui.submit');
-            submitBtn.classList.remove('loading');
-            updateUI();
-        }
-    }
-
-    // ✅ ATTACH SUBMIT HANDLER TO BUTTON
-    submitBtn.addEventListener('click', submitForm);
-    
-    // Also handle form submit event
-    form.addEventListener('submit', submitForm);
-
-    // ========================================
-    // BACK BUTTON
-    // ========================================
-    if (tg && tg.BackButton) {
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            console.log('[WebApp] Back button clicked');
-            if (tg.close) tg.close();
-        });
-    }
-
-    // ========================================
-    // INITIALIZE
-    // ========================================
-    applyTranslations();
-    updateUI();
-    
-    console.log('[WebApp] ========================================');
-    console.log('[WebApp] INITIALIZATION COMPLETE');
-    console.log('[WebApp] ========================================');
-    console.log('[WebApp] Language:', currentLang);
-    console.log('[WebApp] Document:', currentDocType);
-    console.log('[WebApp] Active fields:', Object.keys(activeFields).length);
-    console.log('[WebApp] Telegram API available:', !!tg);
-    console.log('[WebApp] tg.sendData available:', !!(tg && tg.sendData));
-    console.log('[WebApp] Ready to accept user input');
-
-})();
-</script>
-
+    })();
+    </script>
 </body>
 </html>
+
 
 
 
