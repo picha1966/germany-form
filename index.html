@@ -1332,73 +1332,257 @@
     // ========================================
     // КРИТИЧНО: SUBMIT HANDLER
     // ========================================
-    function submitForm(e) {
-        if (e) e.preventDefault();
-        
-        // ✅ 1. ДІАГНОСТИЧНЕ ВІКНО (як ви просили)
-        alert("🚀 Спроба відправки даних...\n\nЗараз перевіримо форму і відправимо дані боту.");
-        
-        console.log('[WebApp] ========================================');
-        console.log('[WebApp] SUBMIT BUTTON CLICKED');
-        console.log('[WebApp] ========================================');
-        
-        if (isSubmitting) {
-            console.log('[WebApp] Already submitting, ignoring click');
-            return;
-        }
+  // ============================================================================
+// БЛОК 1: ПОВНА ФУНКЦІЯ submitForm() ДЛЯ index.html
+// ============================================================================
+// Замініть весь код SUBMIT HANDLER (від рядка ~1339 до ~1443)
+// Шукайте коментар: // ========================================
+//                    // SUBMIT HANDLER
+//                    // ========================================
 
-        // Validate all fields
-        let allValid = true;
-        let emptyFields = [];
+// ========================================
+// SUBMIT HANDLER - ФІНАЛЬНА ВЕРСІЯ
+// ========================================
+function submitForm(e) {
+    if (e) e.preventDefault();
+    
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🚀 SUBMIT FUNCTION CALLED');
+    console.log('═══════════════════════════════════════════════════════════');
+    
+    if (isSubmitting) {
+        console.log('⏸️ Already submitting, ignoring duplicate click');
+        return;
+    }
+    
+    console.log('✅ Step 1: Starting validation...');
+    
+    // КРОК 1: ВАЛІДАЦІЯ ВСІХ ПОЛІВ
+    var allValid = true;
+    var emptyFields = [];
+    var invalidFields = [];
+    
+    Object.keys(activeFields).forEach(function(id) {
+        var field = activeFields[id];
+        var isValid = validateField(id, true);
         
-        Object.keys(activeFields).forEach(id => {
-            const isValid = validateField(id, true);
-            if (!isValid) {
-                allValid = false;
-                const field = activeFields[id];
-                if (field.getAttribute('data-required') === 'true' && !(field.value || '').trim()) {
+        if (!isValid) {
+            allValid = false;
+            if (field.getAttribute('data-required') === 'true') {
+                var value = (field.value || '').trim();
+                if (!value) {
                     emptyFields.push(id);
+                } else {
+                    invalidFields.push(id);
                 }
             }
-        });
-
-        if (!allValid) {
-            console.log('[WebApp] ❌ Validation failed');
-            console.log('[WebApp] Empty required fields:', emptyFields);
-            
-            submitBtn.classList.add('shake');
-            setTimeout(() => submitBtn.classList.remove('shake'), 400);
-            
-            const errorMsg = t('ui.error_empty');
-            if (tg && typeof tg.showAlert === 'function') {
-                tg.showAlert(errorMsg);
-            } else {
-                alert(errorMsg);
-            }
+        }
+    });
+    
+    console.log('📊 Validation results:');
+    console.log('   - All valid:', allValid);
+    console.log('   - Empty required fields:', emptyFields);
+    console.log('   - Invalid fields:', invalidFields);
+    
+    if (!allValid) {
+        console.log('❌ Step 1 FAILED: Validation errors');
+        console.log('═══════════════════════════════════════════════════════════');
+        
+        submitBtn.classList.add('shake');
+        setTimeout(function() { submitBtn.classList.remove('shake'); }, 400);
+        
+        var errorMsg = t('ui.error_empty');
+        if (tg && typeof tg.showAlert === 'function') {
+            tg.showAlert(errorMsg);
+        } else {
+            alert(errorMsg);
+        }
+        return;
+    }
+    
+    console.log('✅ Step 1 PASSED: All fields valid');
+    console.log('✅ Step 2: Setting submitting state...');
+    
+    // КРОК 2: БЛОКУВАННЯ ПОВТОРНОЇ ВІДПРАВКИ
+    isSubmitting = true;
+    submitBtn.textContent = t('ui.sending');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+    
+    console.log('✅ Step 2 PASSED: Button disabled');
+    console.log('✅ Step 3: Collecting form data...');
+    
+    // КРОК 3: ЗБІР ДАНИХ З ФОРМИ
+    var formData = {};
+    var fieldCount = 0;
+    
+    Object.keys(activeFields).forEach(function(id) {
+        var el = activeFields[id];
+        var v = (el.value || '').trim();
+        
+        if (!v) {
+            console.log('   ⏭️ Skipping empty field:', id);
             return;
         }
+        
+        // Нормалізація спеціальних полів
+        if (el.name === 'iban') {
+            var original = v;
+            v = normalizeIBAN(v);
+            console.log('   🔄 Normalized IBAN:', original, '→', v);
+        }
+        if (el.name === 'bic') {
+            var original = v;
+            v = normalizeBIC(v);
+            console.log('   🔄 Normalized BIC:', original, '→', v);
+        }
+        
+        formData[el.name] = v;
+        fieldCount++;
+        console.log('   ✅ Added field:', el.name, '=', v.substring(0, 50) + (v.length > 50 ? '...' : ''));
+    });
+    
+    console.log('📊 Form data collected:');
+    console.log('   - Total fields:', fieldCount);
+    console.log('   - Field names:', Object.keys(formData));
+    console.log('✅ Step 3 PASSED: Form data collected');
+    console.log('✅ Step 4: Creating payload...');
+    
+    // КРОК 4: ФОРМУВАННЯ PAYLOAD (КРИТИЧНО ВАЖЛИВА СТРУКТУРА!)
+    var payload = {
+        doc_type: currentDocType,
+        user_answers: formData,  // ← КРИТИЧНО: ключ "user_answers", НЕ "form_data"!
+        status: 'success'
+    };
+    
+    console.log('📦 Payload structure:');
+    console.log('   - doc_type:', payload.doc_type);
+    console.log('   - user_answers keys:', Object.keys(payload.user_answers));
+    console.log('   - user_answers count:', Object.keys(payload.user_answers).length);
+    console.log('   - status:', payload.status);
+    console.log('📦 Full payload object:', payload);
+    console.log('✅ Step 4 PASSED: Payload created');
+    console.log('✅ Step 5: Checking Telegram API...');
+    
+    // КРОК 5: ПЕРЕВІРКА НАЯВНОСТІ TELEGRAM API
+    console.log('🔍 Telegram API check:');
+    console.log('   - window.Telegram exists:', !!window.Telegram);
+    console.log('   - tg exists:', !!tg);
+    console.log('   - tg.sendData exists:', !!(tg && tg.sendData));
+    console.log('   - typeof tg.sendData:', tg ? typeof tg.sendData : 'N/A');
+    
+    if (!tg || typeof tg.sendData !== 'function') {
+        console.error('❌ CRITICAL ERROR: Telegram WebApp API not available!');
+        console.error('   This means the form was NOT opened through Telegram bot');
+        console.error('   The form MUST be opened by clicking the button in Telegram');
+        console.log('═══════════════════════════════════════════════════════════');
+        
+        alert('❌ ПОМИЛКА!\n\nWebApp може працювати ТІЛЬКИ через Telegram бот.\n\nВідкрийте форму натиснувши кнопку в боті.');
+        
+        // Скинути стан
+        isSubmitting = false;
+        submitBtn.textContent = t('ui.submit');
+        submitBtn.classList.remove('loading');
+        updateUI();
+        return;
+    }
+    
+    console.log('✅ Step 5 PASSED: Telegram API available');
+    console.log('✅ Step 6: Converting to JSON...');
+    
+    // КРОК 6: КОНВЕРТАЦІЯ В JSON
+    var jsonPayload;
+    try {
+        jsonPayload = JSON.stringify(payload);
+        console.log('📄 JSON payload:');
+        console.log('   - Length:', jsonPayload.length, 'characters');
+        console.log('   - First 200 chars:', jsonPayload.substring(0, 200));
+        console.log('   - Full JSON:', jsonPayload);
+        console.log('✅ Step 6 PASSED: JSON created successfully');
+    } catch (jsonError) {
+        console.error('❌ Step 6 FAILED: JSON.stringify error:', jsonError);
+        console.log('═══════════════════════════════════════════════════════════');
+        
+        alert('❌ Помилка конвертації даних: ' + jsonError.message);
+        
+        isSubmitting = false;
+        submitBtn.textContent = t('ui.submit');
+        submitBtn.classList.remove('loading');
+        updateUI();
+        return;
+    }
+    
+    console.log('✅ Step 7: Sending data to bot...');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📤 CALLING tg.sendData()...');
+    console.log('═══════════════════════════════════════════════════════════');
+    
+    // КРОК 7: ВІДПРАВКА ДАНИХ БОТУ
+    try {
+        tg.sendData(jsonPayload);
+        
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('✅✅✅ SUCCESS! tg.sendData() CALLED ✅✅✅');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('📊 Summary:');
+        console.log('   - Document type:', currentDocType);
+        console.log('   - Fields sent:', fieldCount);
+        console.log('   - Payload size:', jsonPayload.length, 'chars');
+        console.log('   - Status: Data sent to bot successfully');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('⏳ WebApp will close automatically in 500ms...');
+        
+        // Показати повідомлення користувачу
+        if (tg && typeof tg.showPopup === 'function') {
+            tg.showPopup({
+                title: '✅ Успіх!',
+                message: 'Дані відправлено боту. Зачекайте, генеруємо PDF...',
+                buttons: [{type: 'close'}]
+            });
+        }
+        
+        // Закрити WebApp через 500мс
+        setTimeout(function() {
+            console.log('🚪 Calling tg.close()...');
+            if (tg.close) {
+                tg.close();
+                console.log('✅ tg.close() called - WebApp should close now');
+            }
+        }, 500);
+        
+    } catch (sendError) {
+        console.error('═══════════════════════════════════════════════════════════');
+        console.error('❌❌❌ CRITICAL ERROR IN tg.sendData() ❌❌❌');
+        console.error('═══════════════════════════════════════════════════════════');
+        console.error('Error object:', sendError);
+        console.error('Error name:', sendError.name);
+        console.error('Error message:', sendError.message);
+        console.error('Error stack:', sendError.stack);
+        console.error('═══════════════════════════════════════════════════════════');
+        
+        var errorMsg = 'Помилка відправки даних:\n' + (sendError.message || 'Невідома помилка');
+        if (tg && typeof tg.showAlert === 'function') {
+            tg.showAlert(errorMsg);
+        } else {
+            alert(errorMsg);
+        }
+        
+        // Скинути стан
+        isSubmitting = false;
+        submitBtn.textContent = t('ui.submit');
+        submitBtn.classList.remove('loading');
+        updateUI();
+    }
+}
 
-        console.log('[WebApp] ✅ All fields valid');
+// ПРИВ'ЯЗАТИ ФУНКЦІЮ ДО КНОПКИ
+submitBtn.addEventListener('click', submitForm);
 
-        // Set submitting state
-        isSubmitting = true;
-        submitBtn.textContent = t('ui.sending');
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
+// Також обробити submit форми
+form.addEventListener('submit', submitForm);
 
-        // Collect form data (clean, normalized)
-        const formData = {};
-        Object.keys(activeFields).forEach(id => {
-            const el = activeFields[id];
-            let v = (el.value || '').trim();
-            if (!v) return;
-            
-            // Normalize
-            if (el.name === 'iban') v = normalizeIBAN(v);
-            if (el.name === 'bic') v = normalizeBIC(v);
-            
-            formData[el.name] = v;
-        });
+console.log('✅ submitForm() function registered');
+console.log('✅ Event listeners attached to button and form');
 
         // ✅ 3. PAYLOAD STRUCTURE (як ви просили)
        const payload = {
@@ -1517,6 +1701,7 @@
 
 </body>
 </html>
+
 
 
 
