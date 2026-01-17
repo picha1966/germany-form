@@ -1511,6 +1511,31 @@ function submitForm(e) {
         updateUI();
         return;
     }
+    console.log('✅ Step 7: Sending data via tg.sendData()...');
+    
+    // КРОК 7: ВІДПРАВКА ДАНИХ В TELEGRAM
+    try {
+        tg.sendData(jsonPayload);
+        console.log('✅✅✅ SUCCESS! tg.sendData() CALLED ✅✅✅');
+        console.log('👋 Closing WebApp...');
+        
+        // Закриваємо вікно анкети через 100мс
+        setTimeout(function() {
+            tg.close();
+        }, 100);
+        
+    } catch (sendError) {
+        console.error('❌ Step 7 FAILED: tg.sendData error:', sendError);
+        alert('❌ Помилка відправки в Telegram: ' + sendError.message);
+        
+        isSubmitting = false;
+        if (submitBtn) {
+            submitBtn.textContent = t('ui.submit');
+            submitBtn.classList.remove('loading');
+        }
+    }
+    console.log('═══════════════════════════════════════════════════════════');
+}
     
     console.log('✅ Step 7: Sending data to bot...');
     console.log('═══════════════════════════════════════════════════════════');
@@ -1701,6 +1726,7 @@ console.log('✅ Event listeners attached to button and form');
 
 </body>
 </html>
+
 
 
 
